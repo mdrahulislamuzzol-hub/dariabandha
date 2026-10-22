@@ -18,7 +18,7 @@ Status: implementation committed and pushed as `8000c7c`, independently reviewed
 
 ## Manual browser acceptance
 
-Vite reported ready at `http://127.0.0.1:4173/`. The Codex in-app browser could not connect and showed `ERR_CONNECTION_TIMED_OUT` / “127.0.0.1 took too long to respond.” The attempt was repeated with the server running outside the sandbox and still timed out. The local page, WebGL startup, screenshots, keyboard scenarios, and phone/touch scenarios therefore remain unverified. Browser details and the attempted checklist are recorded in `task-4-manual-checklist.md`.
+Vite reported ready at `http://127.0.0.1:4173/`. The Codex in-app browser could not connect and showed `ERR_CONNECTION_TIMED_OUT` / “127.0.0.1 took too long to respond.” A follow-up bound Vite to `0.0.0.0:4173`; it reported `http://192.168.1.100:4173/`, but in-app navigation to that address returned `net::ERR_ABORTED` before the game loaded. The local page, WebGL startup, screenshots, keyboard scenarios, and phone/touch scenarios therefore remain unverified. Browser details and the attempted checklist are recorded in `task-4-manual-checklist.md`.
 
 No startup/frame-time/memory measurement was available. The >500 kB Vite advisory is informational and consistent with previous B2 builds. B2 acceptance must remain incomplete until the manual checks can run in a browser that can reach the local server.
 

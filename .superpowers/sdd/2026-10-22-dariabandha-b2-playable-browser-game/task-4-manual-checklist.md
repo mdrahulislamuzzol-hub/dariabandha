@@ -9,6 +9,7 @@ Status: attempted; blocked before the game page loaded. Do not treat the manual 
 - Viewport resolution: not recorded because navigation timed out before the app loaded.
 - Server: Vite 6.4.5 reported ready at `http://127.0.0.1:4173/`.
 - Browser result: `ERR_CONNECTION_TIMED_OUT` (“127.0.0.1 took too long to respond”). Retried after starting the local server outside the sandbox; same result.
+- Follow-up attempt: Vite was bound to `0.0.0.0:4173` and reported the machine address `http://192.168.1.100:4173/`; opening that URL in the same in-app browser returned `net::ERR_ABORTED` before the game loaded.
 - Startup/frame-time/memory: not measured. WebGL and device/touch capability were not reached.
 
 ## Checklist
@@ -16,6 +17,7 @@ Status: attempted; blocked before the game page loaded. Do not treat the manual 
 - [x] Start the local Vite server and confirm it reports ready.
 - [x] Attempt to open the local URL in the available in-app browser.
 - [x] Retry with the server started outside the sandbox.
+- [x] Retry through the machine's network interface with Vite bound to `0.0.0.0`.
 - [ ] Confirm the game DOM and HUD are visible in a browser.
 - [ ] Confirm WebGL scene starts and the 4v4 court/all eight players render.
 - [ ] Verify HUD role/team, phase, score, clock, stamina, and latest call in the live page.
