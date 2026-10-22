@@ -1,0 +1,343 @@
+# Review package: 9ac8e4101e19e4042f96767703dd4dcc39fdf48e..4489188c11cba49787f138403e400aaba18584a2
+
+## Commits
+4489188 feat: add deterministic rules constants and validation
+
+## Files changed
+ package.json                   |   8 +++
+ src/rules/constants.js         | 117 +++++++++++++++++++++++++++++++++++++++++
+ src/rules/validation.js        |  66 +++++++++++++++++++++++
+ tests/rules/constants.test.js  |  55 +++++++++++++++++++
+ tests/rules/validation.test.js |  53 +++++++++++++++++++
+ 5 files changed, 299 insertions(+)
+
+## Diff
+diff --git a/package.json b/package.json
+new file mode 100644
+index 0000000..541c152
+--- /dev/null
++++ b/package.json
+@@ -0,0 +1,8 @@
++{
++  "name": "dariabandha-rules-core",
++  "private": true,
++  "type": "module",
++  "scripts": {
++    "test": "node --test"
++  }
++}
+diff --git a/src/rules/constants.js b/src/rules/constants.js
+new file mode 100644
+index 0000000..739e8e3
+--- /dev/null
++++ b/src/rules/constants.js
+@@ -0,0 +1,117 @@
++/**
++ * Authoritative B1 tuning data. Values use metres, seconds, and simulation
++ * ticks unless their names state otherwise. These exports must not depend on
++ * rendering or cosmetics.
++ */
++
++export const TICK_RATE = 60;
++export const MAX_STEPS_PER_FRAME = 5;
++export const METRES_PER_FOOT = 0.3048;
++export const FEET_PER_METRE = 1 / METRES_PER_FOOT;
++
++export const BOX_SIZE_METRES = 10 * METRES_PER_FOOT;
++export const COURT_WIDTH_METRES = 20 * METRES_PER_FOOT;
++export const LANE_WIDTH_METRES = 0.6;
++export const LINE_HALF_WIDTH_METRES = 0.05;
++export const FOOT_CIRCLE_RADIUS_METRES = 0.07;
++
++export const ATTACKER_CAPSULE_RADIUS_METRES = 0.3;
++export const ATTACKER_CAPSULE_HEIGHT_METRES = 1.7;
++export const ATTACKER_WALK_SPEED_METRES_PER_SECOND = 1.6;
++export const ATTACKER_JOG_SPEED_METRES_PER_SECOND = 3.2;
++export const ATTACKER_RUN_SPEED_METRES_PER_SECOND = 5.0;
++export const ATTACKER_SPRINT_SPEED_METRES_PER_SECOND = 6.4;
++export const ATTACKER_TIME_TO_RUN_SPEED_TICKS = 18;
++export const ATTACKER_STOP_TIME_TICKS = 12;
++export const ATTACKER_SPRINT_TURN_180_TICKS = 27;
++export const ATTACKER_RUN_TURN_180_TICKS = 12;
++
++export const STAMINA_CAPACITY = 100;
++export const STAMINA_SPRINT_DRAIN_PER_SECOND = 18;
++export const STAMINA_JOG_RECOVERY_PER_SECOND = 10;
++export const STAMINA_STANDING_RECOVERY_PER_SECOND = 16;
++export const STAMINA_SPRINT_REENABLE_THRESHOLD = 25;
++
++export const GUARD_WALK_SPEED_METRES_PER_SECOND = 1.6;
++export const GUARD_JOG_SPEED_METRES_PER_SECOND = 2.8;
++export const GUARD_RUN_SPEED_METRES_PER_SECOND = 4.2;
++export const GUARD_TIME_TO_SPEED_TICKS = 6;
++export const GUARD_STOP_TIME_TICKS = 5;
++
++export const TAG_REACH_METRES = 0.9;
++export const TAG_AIM_ASSIST_CONE_DEGREES = 25;
++export const TAG_WINDUP_TICKS = 6;
++export const TAG_ACTIVE_TICKS = 9;
++export const TAG_RECOVERY_TICKS = 18;
++export const TAG_HOLD_TICKS = 30;
++export const TAG_MOVEMENT_SPEED_MULTIPLIER = 0.5;
++export const TAG_HIT_STOP_TICKS = 4;
++
++export const STANDARD_HALF_TICKS = 18_000;
++export const QUICK_HALF_TICKS = 12_600;
++export const BREAK_TICKS = 1_800;
++export const STANDARD_TIEBREAK_HALF_TICKS = 7_200;
++export const TRADITIONAL_MATCH_CAP_TICKS = 28_800;
++export const TRANSITION_CAP_TICKS = 360;
++export const CLOCK_ZERO_RESOLVE_WINDOW_TICKS = 120;
++
++export const PRO_FEINT_TICKS = 12;
++export const PRO_FEINT_COOLDOWN_TICKS = 180;
++export const PRO_BURST_CUT_TICKS = 9;
++export const PRO_BURST_CUT_STAMINA_COST = 15;
++export const PRO_LUNGE_REACH_BONUS_METRES = 0.35;
++export const PRO_LUNGE_RECOVERY_BONUS_TICKS = 21;
++export const PRO_LUNGE_COOLDOWN_TICKS = 240;
++
++export const ATTACKER_CAMERA_DISTANCE_METRES = 5;
++export const ATTACKER_CAMERA_HEIGHT_METRES = 2.8;
++export const ATTACKER_CAMERA_PITCH_DEGREES = -22;
++export const ATTACKER_CAMERA_FOV_DEGREES = 70;
++export const GUARD_CAMERA_DISTANCE_METRES = 4.5;
++export const GUARD_CAMERA_HEIGHT_METRES = 2.4;
++export const GUARD_CAMERA_YAW_LIMIT_DEGREES = 25;
++
++export const AI_REACTION_TICKS = Object.freeze({
++  easy: 24,
++  standard: 18,
++  hard: 13,
++  expert: 10,
++});
++export const AI_TARGET_ROUND_TRIP_SUCCESS_MIN = 0.3;
++export const AI_TARGET_ROUND_TRIP_SUCCESS_MAX = 0.45;
++export const SERVER_TICK_RATE = 30;
++export const SERVER_SNAPSHOT_RATE = 15;
++export const NETWORK_INTERPOLATION_MILLISECONDS = 100;
++export const NETWORK_LAG_COMPENSATION_CAP_MILLISECONDS = 120;
++
++export const FORMAT_SPECS = Object.freeze({
++  '2v2': Object.freeze({ teamSize: 2, rowCount: 3 }),
++  '4v4': Object.freeze({ teamSize: 4, rowCount: 4 }),
++  '6v6': Object.freeze({ teamSize: 6, rowCount: 5 }),
++});
++
++export const PROFILE_SPECS = Object.freeze({
++  traditional: Object.freeze({ version: '0.1', timingShape: 'traditional' }),
++  'competitive-standard': Object.freeze({ version: '0.1', timingShape: 'standard' }),
++  'quick-match': Object.freeze({ version: '0.1', timingShape: 'quick' }),
++  pro: Object.freeze({ version: '0.1', timingShape: 'selectable' }),
++});
++
++export const TUNING_CONSTANTS = Object.freeze({
++  tickRate: TICK_RATE,
++  maxStepsPerFrame: MAX_STEPS_PER_FRAME,
++  metresPerFoot: METRES_PER_FOOT,
++  boxSizeMetres: BOX_SIZE_METRES,
++  courtWidthMetres: COURT_WIDTH_METRES,
++  laneWidthMetres: LANE_WIDTH_METRES,
++  lineHalfWidthMetres: LINE_HALF_WIDTH_METRES,
++  footCircleRadiusMetres: FOOT_CIRCLE_RADIUS_METRES,
++  tagReachMetres: TAG_REACH_METRES,
++  tagAimAssistConeDegrees: TAG_AIM_ASSIST_CONE_DEGREES,
++  tagWindupTicks: TAG_WINDUP_TICKS,
++  tagActiveTicks: TAG_ACTIVE_TICKS,
++  tagRecoveryTicks: TAG_RECOVERY_TICKS,
++  tagHoldTicks: TAG_HOLD_TICKS,
++  formats: FORMAT_SPECS,
++  profiles: PROFILE_SPECS,
++});
+diff --git a/src/rules/validation.js b/src/rules/validation.js
+new file mode 100644
+index 0000000..4a15008
+--- /dev/null
++++ b/src/rules/validation.js
+@@ -0,0 +1,66 @@
++import { FORMAT_SPECS, PROFILE_SPECS } from './constants.js';
++
++const formatValues = Object.keys(FORMAT_SPECS);
++const profileIdValues = Object.keys(PROFILE_SPECS);
++
++function describeValue(value) {
++  if (value === undefined) return 'undefined';
++  if (value === null) return 'null';
++  if (typeof value === 'string') return JSON.stringify(value);
++  if (typeof value === 'number' || typeof value === 'boolean') return String(value);
++  if (Array.isArray(value)) return JSON.stringify(value);
++  return Object.prototype.toString.call(value);
++}
++
++function quotedValues(values) {
++  return values.map((value) => JSON.stringify(value)).join(', ');
++}
++
++/**
++ * Validates a format identifier before match construction.
++ * @param {string} format
++ * @returns {string} the same, validated format value
++ */
++export function assertValidFormat(format) {
++  if (typeof format !== 'string') {
++    throw new TypeError(`format must be a string; received ${describeValue(format)}`);
++  }
++  if (!Object.hasOwn(FORMAT_SPECS, format)) {
++    throw new RangeError(
++      `format must be one of ${quotedValues(formatValues)}; received ${describeValue(format)}`,
++    );
++  }
++  return format;
++}
++
++/**
++ * Validates a replay-safe rule profile reference before match construction.
++ * @param {{id: string, version: string}} profile
++ * @returns {{id: string, version: string}} the same, validated profile value
++ */
++export function assertValidProfile(profile) {
++  if (profile === null || typeof profile !== 'object' || Array.isArray(profile)) {
++    throw new TypeError(`profile must be an object; received ${describeValue(profile)}`);
++  }
++  if (typeof profile.id !== 'string') {
++    throw new TypeError(`profile.id must be a string; received ${describeValue(profile.id)}`);
++  }
++  if (!Object.hasOwn(PROFILE_SPECS, profile.id)) {
++    throw new RangeError(
++      `profile.id must be one of ${quotedValues(profileIdValues)}; received ${describeValue(profile.id)}`,
++    );
++  }
++  if (typeof profile.version !== 'string') {
++    throw new TypeError(
++      `profile.version must be a string; received ${describeValue(profile.version)}`,
++    );
++  }
++
++  const expectedVersion = PROFILE_SPECS[profile.id].version;
++  if (profile.version !== expectedVersion) {
++    throw new RangeError(
++      `profile.version must be ${JSON.stringify(expectedVersion)} for profile.id ${JSON.stringify(profile.id)}; received ${describeValue(profile.version)}`,
++    );
++  }
++  return profile;
++}
+diff --git a/tests/rules/constants.test.js b/tests/rules/constants.test.js
+new file mode 100644
+index 0000000..aca4d62
+--- /dev/null
++++ b/tests/rules/constants.test.js
+@@ -0,0 +1,55 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++
++import {
++  ATTACKER_CAPSULE_HEIGHT_METRES,
++  ATTACKER_CAPSULE_RADIUS_METRES,
++  BOX_SIZE_METRES,
++  COURT_WIDTH_METRES,
++  FORMAT_SPECS,
++  FOOT_CIRCLE_RADIUS_METRES,
++  LANE_WIDTH_METRES,
++  LINE_HALF_WIDTH_METRES,
++  MAX_STEPS_PER_FRAME,
++  METRES_PER_FOOT,
++  TAG_ACTIVE_TICKS,
++  TAG_AIM_ASSIST_CONE_DEGREES,
++  TAG_HOLD_TICKS,
++  TAG_REACH_METRES,
++  TAG_RECOVERY_TICKS,
++  TAG_WINDUP_TICKS,
++  TICK_RATE,
++} from '../../src/rules/constants.js';
++
++test('exports the exact fixed-tick and court dimensions', () => {
++  assert.equal(TICK_RATE, 60);
++  assert.equal(MAX_STEPS_PER_FRAME, 5);
++  assert.equal(METRES_PER_FOOT, 0.3048);
++  assert.equal(BOX_SIZE_METRES, 3.048);
++  assert.equal(COURT_WIDTH_METRES, 6.096);
++  assert.equal(LANE_WIDTH_METRES, 0.6);
++  assert.equal(LINE_HALF_WIDTH_METRES, 0.05);
++  assert.equal(FOOT_CIRCLE_RADIUS_METRES, 0.07);
++  assert.equal(ATTACKER_CAPSULE_RADIUS_METRES, 0.3);
++  assert.equal(ATTACKER_CAPSULE_HEIGHT_METRES, 1.7);
++});
++
++test('exports the exact tag timing and reach tuning', () => {
++  assert.equal(TAG_REACH_METRES, 0.9);
++  assert.equal(TAG_AIM_ASSIST_CONE_DEGREES, 25);
++  assert.equal(TAG_WINDUP_TICKS, 6);
++  assert.equal(TAG_ACTIVE_TICKS, 9);
++  assert.equal(TAG_RECOVERY_TICKS, 18);
++  assert.equal(TAG_HOLD_TICKS, 30);
++});
++
++test('defines immutable format team-size and row-count data', () => {
++  assert.deepEqual(FORMAT_SPECS, {
++    '2v2': { teamSize: 2, rowCount: 3 },
++    '4v4': { teamSize: 4, rowCount: 4 },
++    '6v6': { teamSize: 6, rowCount: 5 },
++  });
++  assert.throws(() => {
++    FORMAT_SPECS['2v2'].rowCount = 99;
++  }, TypeError);
++});
+diff --git a/tests/rules/validation.test.js b/tests/rules/validation.test.js
+new file mode 100644
+index 0000000..0b867d1
+--- /dev/null
++++ b/tests/rules/validation.test.js
+@@ -0,0 +1,53 @@
++import assert from 'node:assert/strict';
++import test from 'node:test';
++
++import { assertValidFormat, assertValidProfile } from '../../src/rules/validation.js';
++
++test('accepts each supported format boundary', () => {
++  assert.equal(assertValidFormat('2v2'), '2v2');
++  assert.equal(assertValidFormat('4v4'), '4v4');
++  assert.equal(assertValidFormat('6v6'), '6v6');
++});
++
++test('rejects an unsupported format with its field and value', () => {
++  assert.throws(
++    () => assertValidFormat('3v3'),
++    /^RangeError: format must be one of "2v2", "4v4", "6v6"; received "3v3"$/,
++  );
++});
++
++test('rejects format coercion attempts', () => {
++  assert.throws(
++    () => assertValidFormat(2),
++    /^TypeError: format must be a string; received 2$/,
++  );
++});
++
++test('accepts each stable profile id and version', () => {
++  for (const id of ['traditional', 'competitive-standard', 'quick-match', 'pro']) {
++    const profile = { id, version: '0.1' };
++    assert.equal(assertValidProfile(profile), profile);
++  }
++});
++
++test('rejects missing profile fields with field and value', () => {
++  assert.throws(
++    () => assertValidProfile({ id: 'traditional' }),
++    /^TypeError: profile\.version must be a string; received undefined$/,
++  );
++});
++
++test('rejects unknown profile ids and versions without coercion', () => {
++  assert.throws(
++    () => assertValidProfile({ id: 'quick-match', version: '1' }),
++    /^RangeError: profile\.version must be "0\.1" for profile\.id "quick-match"; received "1"$/,
++  );
++  assert.throws(
++    () => assertValidProfile({ id: 'traditional', version: 0.1 }),
++    /^TypeError: profile\.version must be a string; received 0\.1$/,
++  );
++  assert.throws(
++    () => assertValidProfile({ id: 'unranked', version: '0.1' }),
++    /^RangeError: profile\.id must be one of "traditional", "competitive-standard", "quick-match", "pro"; received "unranked"$/,
++  );
++});

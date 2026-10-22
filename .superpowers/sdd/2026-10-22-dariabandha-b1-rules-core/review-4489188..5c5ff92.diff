@@ -1,0 +1,128 @@
+# Review package: 4489188c11cba49787f138403e400aaba18584a2..5c5ff92e885cd5a1c34a22c25416d6ba418a4bdf
+
+## Commits
+5c5ff92 fix: validate profile timing shapes
+
+## Files changed
+ src/rules/validation.js        | 16 ++++++++++++++--
+ tests/rules/validation.test.js | 27 ++++++++++++++++++++++++---
+ 2 files changed, 38 insertions(+), 5 deletions(-)
+
+## Diff
+diff --git a/src/rules/validation.js b/src/rules/validation.js
+index 4a15008..9dcfd32 100644
+--- a/src/rules/validation.js
++++ b/src/rules/validation.js
+@@ -28,22 +28,22 @@ export function assertValidFormat(format) {
+   if (!Object.hasOwn(FORMAT_SPECS, format)) {
+     throw new RangeError(
+       `format must be one of ${quotedValues(formatValues)}; received ${describeValue(format)}`,
+     );
+   }
+   return format;
+ }
+ 
+ /**
+  * Validates a replay-safe rule profile reference before match construction.
+- * @param {{id: string, version: string}} profile
+- * @returns {{id: string, version: string}} the same, validated profile value
++ * @param {{id: string, version: string, timingShape: string}} profile
++ * @returns {{id: string, version: string, timingShape: string}} the same, validated profile value
+  */
+ export function assertValidProfile(profile) {
+   if (profile === null || typeof profile !== 'object' || Array.isArray(profile)) {
+     throw new TypeError(`profile must be an object; received ${describeValue(profile)}`);
+   }
+   if (typeof profile.id !== 'string') {
+     throw new TypeError(`profile.id must be a string; received ${describeValue(profile.id)}`);
+   }
+   if (!Object.hasOwn(PROFILE_SPECS, profile.id)) {
+     throw new RangeError(
+@@ -55,12 +55,24 @@ export function assertValidProfile(profile) {
+       `profile.version must be a string; received ${describeValue(profile.version)}`,
+     );
+   }
+ 
+   const expectedVersion = PROFILE_SPECS[profile.id].version;
+   if (profile.version !== expectedVersion) {
+     throw new RangeError(
+       `profile.version must be ${JSON.stringify(expectedVersion)} for profile.id ${JSON.stringify(profile.id)}; received ${describeValue(profile.version)}`,
+     );
+   }
++  if (typeof profile.timingShape !== 'string') {
++    throw new TypeError(
++      `profile.timingShape must be a string; received ${describeValue(profile.timingShape)}`,
++    );
++  }
++
++  const expectedTimingShape = PROFILE_SPECS[profile.id].timingShape;
++  if (profile.timingShape !== expectedTimingShape) {
++    throw new RangeError(
++      `profile.timingShape must be ${JSON.stringify(expectedTimingShape)} for profile.id ${JSON.stringify(profile.id)}; received ${describeValue(profile.timingShape)}`,
++    );
++  }
+   return profile;
+ }
+diff --git a/tests/rules/validation.test.js b/tests/rules/validation.test.js
+index 0b867d1..54d8d32 100644
+--- a/tests/rules/validation.test.js
++++ b/tests/rules/validation.test.js
+@@ -16,34 +16,55 @@ test('rejects an unsupported format with its field and value', () => {
+   );
+ });
+ 
+ test('rejects format coercion attempts', () => {
+   assert.throws(
+     () => assertValidFormat(2),
+     /^TypeError: format must be a string; received 2$/,
+   );
+ });
+ 
+-test('accepts each stable profile id and version', () => {
+-  for (const id of ['traditional', 'competitive-standard', 'quick-match', 'pro']) {
+-    const profile = { id, version: '0.1' };
++test('accepts each stable profile id, version, and timing shape', () => {
++  const timingShapes = {
++    traditional: 'traditional',
++    'competitive-standard': 'standard',
++    'quick-match': 'quick',
++    pro: 'selectable',
++  };
++  for (const [id, timingShape] of Object.entries(timingShapes)) {
++    const profile = { id, version: '0.1', timingShape };
+     assert.equal(assertValidProfile(profile), profile);
+   }
+ });
+ 
+ test('rejects missing profile fields with field and value', () => {
+   assert.throws(
+     () => assertValidProfile({ id: 'traditional' }),
+     /^TypeError: profile\.version must be a string; received undefined$/,
+   );
+ });
+ 
++test('rejects missing, mistyped, and mismatched profile timing shapes', () => {
++  assert.throws(
++    () => assertValidProfile({ id: 'traditional', version: '0.1' }),
++    /^TypeError: profile\.timingShape must be a string; received undefined$/,
++  );
++  assert.throws(
++    () => assertValidProfile({ id: 'traditional', version: '0.1', timingShape: 1 }),
++    /^TypeError: profile\.timingShape must be a string; received 1$/,
++  );
++  assert.throws(
++    () => assertValidProfile({ id: 'traditional', version: '0.1', timingShape: 'quick' }),
++    /^RangeError: profile\.timingShape must be "traditional" for profile\.id "traditional"; received "quick"$/,
++  );
++});
++
+ test('rejects unknown profile ids and versions without coercion', () => {
+   assert.throws(
+     () => assertValidProfile({ id: 'quick-match', version: '1' }),
+     /^RangeError: profile\.version must be "0\.1" for profile\.id "quick-match"; received "1"$/,
+   );
+   assert.throws(
+     () => assertValidProfile({ id: 'traditional', version: 0.1 }),
+     /^TypeError: profile\.version must be a string; received 0\.1$/,
+   );
+   assert.throws(
