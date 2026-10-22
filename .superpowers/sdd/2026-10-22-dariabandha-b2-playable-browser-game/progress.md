@@ -3,7 +3,7 @@
 Canonical status is maintained in `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`. Keep this detailed implementation/review log synchronized with that authoritative ledger; do not use this file as a conflicting checkpoint.
 
 Plan: `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md`  
-Resume base: `codex/dariabandha-b1` at `e6f02a7` (clean working tree)
+Task 4 base: `codex/dariabandha-b1` at `e6f02a7` plus documentation checkpoint `d26065b`; implementation commit `8000c7c` is pushed.
 Workflow: sequential implementer → independent reviewer → fixes → fresh re-review. Do not start a task until its predecessor is cleanly reviewed. Do not push an unreviewed task.
 
 ## Task status
@@ -11,7 +11,7 @@ Workflow: sequential implementer → independent reviewer → fixes → fresh re
 - Task 1 — Browser Shell and Fixed-Tick Bridge: independently reviewed clean, committed, and pushed as `6cc52b2`; reviewer reran Node tests (63/63) and production build successfully. HTTP/browser smoke was attempted but sandbox access denied local socket access. See `task-1-report.md`.
 - Task 2 — 4v4 Grey-Box Court and Player View: independently reviewed clean and committed/pushed through checkpoint `c562467` (implementation commit `cd6acd1`); 68/68 tests and production build passed. Manual browser/WebGL validation remains outstanding. See `task-2-report.md` and `task-2-manual-checklist.md`.
 - Task 3 — Keyboard/Touch Control, Camera, and B1 Simulation: independently reviewed clean and committed/pushed through `e6f02a7` (implementation commit `082b3c6`); focused tests 7/7, full suite 75/75, production build passes. Includes owner-approved §25 stop-time correction. See `task-3-report.md`.
-- Task 4: not started; next task. No Task 4 implementation changes remain in the working tree at this checkpoint.
+- Task 4 — Basic HUD, Reset, and B2 Acceptance/Handoff: implementation committed and pushed as `8000c7c`, independently reviewed clean. Focused tests 3/3; full suite 78/78; Vite build passes. B2 acceptance remains incomplete because browser/WebGL and keyboard/touch manual checks could not connect to the local server; see `task-4-report.md` and `task-4-manual-checklist.md`.
 
 ## Task 1 implementation notes
 
@@ -43,3 +43,11 @@ Workflow: sequential implementer → independent reviewer → fixes → fresh re
 - Focused Task 3 suite: 7/7. Full Node suite: 75/75. Vite production build passes (19 modules, 643.60 kB minified / 167.50 kB gzip) with default >500 kB advisory. Manual WebGL/browser/touch-device checks were not possible in this execution; no live behavior claim is made.
 - §25 source wording: “Attacker — Time to run speed / stop time — 18 ticks / 12 ticks” and “Guard — Time to speed / stop time — 6 ticks / 5 ticks.” Initial measurement showed B1's proportional decrement left 2.252772 m/s from a 6.4 m/s attacker after 12 neutral ticks. The owner approved a scoped deviation in `src/rules/simulation.js`: neutral braking now subtracts `roleTopSpeed / stopTimeTicks` each tick. Tests verify a top-speed attacker reaches zero on tick 12 and a top-speed guard reaches zero on tick 5. Acceleration, movement caps, stamina and other rules are unchanged.
 - Independent Task 3 review is clean; reviewer reran 75/75 tests and production build. The review's plan-status and window-blur coverage suggestions were addressed. No `sources/` files changed. Task 3 was committed and pushed through `e6f02a7`. Next: start Task 4 from the approved plan.
+
+## Task 4 implementation notes
+
+- Added `src/browser/hud.js` to format the controlled player's role/team, B1 phase, score, clock/half, stamina, and latest call/event from public state. `index.html` provides the DOM fields; `main.js` updates them at initialization and after each authoritative frame. Only the latest-call field is a live announcement region.
+- The reset button reconstructs the exact fixed-seed Quick Match fixture, clears pending input/accumulator state, and retains the same human seat. Tests verify the reset state equals the original, seed/RNG state is unchanged beyond the single opening toss, and only one toss event exists.
+- Focused Task 4 tests: 3/3. Full bundled-Node suite: 78/78. Vite 6.4.5 production build: 20 modules, 645.49 kB minified JS / 168.14 kB gzip; default >500 kB advisory remains. `git diff --check` passes. Independent review is clean and independently verified tests/build.
+- Browser QA attempt: Vite started at `http://127.0.0.1:4173/`; the Codex in-app browser timed out (`ERR_CONNECTION_TIMED_OUT`) even when the server was run outside the sandbox. WebGL, scene screenshots, keyboard play, and phone/touch play were not verified. No device, frame-time, or memory measurements were available. See `task-4-manual-checklist.md`.
+- Task 4 implementation commit `8000c7c` is pushed. The code review passed; the browser acceptance gate did not. The seven inactive AI seats remain stationary. Do not begin B3 until outstanding B2 manual checks pass.

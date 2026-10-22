@@ -1,28 +1,27 @@
 DARIABANDHA — CURRENT HANDOFF
 
-Updated: 2026-10-22
+Updated: 2026-10-23
 Repository: https://github.com/mdrahulislamuzzol-hub/dariabandha
 Current branch: codex/dariabandha-b1
-Current checkpoint: B2 Tasks 1–3 independently reviewed, committed, and pushed on `codex/dariabandha-b1` through `e6f02a7`; B2 Task 4 has not started; manual browser/WebGL validation outstanding
-Workflow: sequential subagent-driven implementation, independent review, fixes and fresh re-review for each task. Push each reviewed task to GitHub.
+Task 4 implementation commit: 8000c7c (basic HUD and deterministic reset; independent review clean)
+Current status: Task 4 implementation commit `8000c7c` is pushed to `codex/dariabandha-b1`; 78/78 Node tests pass and the production build succeeds. B2 acceptance is INCOMPLETE pending browser/WebGL and keyboard/touch manual checks.
+Next: complete B2 manual browser checks. Only after B2 acceptance is complete, proceed to B3 Match flow. Do not start B3 or any later milestone yet.
 
 B1 status
-- B1 renderer-free deterministic rules core is complete. Its approved task groups and the user-requested Sikka/spine vacancy, smaller-format guard placement, seeded toss, and constants-test follow-ups are recorded in `.superpowers/sdd/2026-10-22-dariabandha-b1-rules-core/`.
-- Latest verified suite: 59 tests pass. The independent review of the latest B1 follow-up is clean.
-- B1 plan: `docs/superpowers/plans/2026-10-22-dariabandha-b1-rules-core.md`.
+- B1 renderer-free deterministic rules core is complete. The approved implementation/review records are under `.superpowers/sdd/2026-10-22-dariabandha-b1-rules-core/`.
+- The owner-approved B1 stop-time correction was limited to neutral braking: attacker stop within 12 ticks and guard stop within 5. Do not broaden or redo it.
 
-Next work
-- Read `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md` in full. It defines four sequential B2 task groups, scope boundaries, interfaces, acceptance gates, and the review/push process.
-- The master plan formally defines B2 as Grey-box game in §23. The repository plan breaks B2 into four reviewed tasks; it does not expand B2 into later AI, menu, presentation, tutorial, performance/release, or online milestones.
-- Note: root `master.txt` omits the full B1–B9 table. Read the supplied read-only v2.0 and v2.1 DOCX sources in `sources/` before implementation and compare them with `master.txt`.
-- B2 Task 1 adds a Vite/Three.js browser shell, deterministic 4v4 Quick Match attacker/guard/Sikka fixtures, and a DOM-free fixed-tick coordinator. Dependencies are pinned (`three@0.128.0`, `vite@6.4.5`); 63/63 tests and the build passed; independent review was clean. The local HTTP smoke check was blocked by sandbox socket permissions. Task 1 is pushed in commit `6cc52b2`.
-- B2 Task 2 adds the B1-derived court, lane/spine markings, eight state-driven primitive players, shape-coded team/controller/role markers, stamina/state visuals, and transform interpolation. Focused checks pass 5/5 and full Node suite passes 68/68; production build succeeds with Vite's default >500 kB chunk advisory. Independent review is clean. Task 2 is committed/pushed through checkpoint `c562467`. Manual browser/WebGL validation remains outstanding. Its initial-spawn/both-ends screenshot checklist is `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/task-2-manual-checklist.md`.
-- B2 Task 3 adds normalized keyboard/touch controls, deterministic camera-cone tag targeting, role cameras, persistent human-seat control, and seven neutral AI seats. The owner approved a scoped §25 stop-time fix in the B1 simulation: at maximum speed an attacker stops within 12 ticks and a guard within 5. Focused checks pass 7/7; full suite passes 75/75; production build passes with Vite's default >500 kB chunk advisory. Independent review is clean; the task is committed and pushed through `e6f02a7`. Details and the initial measured mismatch are in `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/task-3-report.md`.
-- The canonical B2 status ledger is `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`; the detailed SDD ledger/report under `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/` must remain consistent with it.
-- Do not redo B1. Use the B1 APIs/tests as existing contracts and update the canonical B2 ledger plus detailed task reports after every task. Exact current status and known limits are in `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md` and `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/`.
-- Next: begin B2 Task 4 only. No Task 4 code was started or left uncommitted at this checkpoint. First inspect branch/HEAD/status and the canonical ledger; do not redo Tasks 1–3. Before implementation, compare the master plan the owner supplies with the read-only reference text in `master.txt` and any `sources/` files. Record any differences in the B2 ledger. Treat all files under `sources/` as read-only.
+B2 status
+- Task 1: local Vite/Three.js browser shell, deterministic Quick Match fixtures, and fixed-tick bridge; independently reviewed and pushed.
+- Task 2: B1-derived 4v4 grey-box court and eight state-driven primitive players; independently reviewed and pushed.
+- Task 3: normalized keyboard/touch inputs, role cameras, deterministic targeting, persistent human seat, and seven neutral AI seats; independently reviewed and pushed. AI remains stationary in B2.
+- Task 4: basic HUD for human role/team, phase, score, clock, stamina, and latest B1 call; reset recreates the fixed-seed fixture without an extra toss draw. Independent review is clean. Focused tests pass 3/3; full suite passes 78/78; production build passes (645.49 kB minified JS, 168.14 kB gzip) with Vite's default >500 kB advisory.
+- Browser attempt: Vite reported ready at `http://127.0.0.1:4173/`. The Codex in-app browser timed out with `ERR_CONNECTION_TIMED_OUT`, including after the server was started outside the sandbox. WebGL startup, screenshots, keyboard play, and phone/touch play are not verified. See `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/task-4-manual-checklist.md`.
+- Earlier Task 1–3 browser/WebGL checks also remain outstanding; Task 2's checklist is `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/task-2-manual-checklist.md`.
 
-Safety and scope
-- Do not start later B3 content, online play, publish/host, merge, or connect external services without explicit approval.
-- Keep the rules core renderer-independent. Browser/Three.js code belongs in presentation/platform modules; no renderer imports in `src/rules/`.
-- Keep GitHub current after each task has passed independent review. Do not push an unreviewed task.
+Source and scope authority
+- The owner-supplied v2.0 master plan and v2.1 addendum were compared with repository copies under `sources/`; their SHA-256 hashes match exactly. Both `sources/` and root `master.txt` are read-only.
+- Root `master.txt` omits the B1–B9 build-order table in v2.0 §23. The authoritative v2.0 DOCX defines B2 as Grey-box game and B3 as Match flow; the v2.1 addendum adds no build steps and assigns its accepted presentation items to existing B6/B7 work. This mismatch is recorded in the canonical ledger.
+- B2 is only the playable grey-box 4v4 Quick Match fixture. The seven non-human seats stay neutral/stationary. Active AI, full modes/menus, online play, publishing, and all B3–B9 work remain out of scope.
+
+Required handoff records: `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`, `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/progress.md`, and the Task 4 report/checklist in that SDD folder.

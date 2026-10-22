@@ -1,6 +1,6 @@
 # Dariabandha B2 Grey-Box Game Plan
 
-**Status:** Final plan review clean; Tasks 1–3 are independently reviewed, committed, and pushed through `e6f02a7`. Task 4 has not started. Manual browser/WebGL validation remains outstanding. See the canonical status ledger at `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`.
+**Status:** Final plan review clean. Tasks 1–4 are implemented and independently reviewed; Task 4 code commit `8000c7c` is pushed to `codex/dariabandha-b1`. The 78-test Node suite and production build pass. B2 acceptance remains incomplete pending browser/WebGL and keyboard/touch manual checks; the in-app browser timed out connecting to the local Vite server. See the canonical status ledger and Task 4 manual checklist.
 **Master-plan milestone:** B2 Grey-box game (§23).  
 **Base:** `codex/dariabandha-b1` at B1-complete commit `113d739`.  
 **Goal:** Deliver the master plan's first playable browser scene: a 4v4 Dariabandha court with capsule players, movement, stamina, role-appropriate camera, keyboard/touch input, a basic HUD, and seven inactive AI-controlled seats.
