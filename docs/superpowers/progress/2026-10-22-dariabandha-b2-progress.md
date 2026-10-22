@@ -1,8 +1,8 @@
 # Dariabandha B2 Progress Ledger
 
-**Status:** Tasks 1–2 are reviewed, committed, and pushed. Task 3 and the owner-approved §25 stop-time correction are independently reviewed clean; commit/push is pending. Manual browser/WebGL validation remains outstanding. Task 4 has not started.
+**Status:** Tasks 1–3, including the owner-approved §25 stop-time correction, are independently reviewed, committed, and pushed through `e6f02a7`. Task 4 has not started. Manual browser/WebGL validation remains outstanding.
 **Plan:** `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md`  
-**B2 Task 3 base:** branch `codex/dariabandha-b1`, commit `c562467`. B1 is complete at `113d739` (59 tests passing, independent review clean).
+**B2 Task 4 starting point:** branch `codex/dariabandha-b1`, commit `e6f02a7` (clean working tree). B1 is complete; the cumulative suite has 75 passing tests.
 **B2 workflow:** sequential fresh implementer → independent reviewer → fixes → fresh re-review, then commit/push before beginning the next task.
 
 This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/progress.md` and the task reports/checklists are detailed execution records and must stay consistent with this checkpoint.
@@ -21,8 +21,8 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 |---|---|---|---|---|
 | 1 | Browser shell and fixed-tick bridge | Implemented; reviewed clean | `4a6c923` (implementation `914eb39`) | Clean; no actionable findings |
 | 2 | 4v4 grey-box court and player view | Implemented, reviewed, committed, and pushed | `cd6acd1` (checkpoint `c562467`) | Clean; no code/scope findings |
-| 3 | Keyboard/touch control, camera, and B1 simulation | Implemented; reviewed clean; approved §25 stop-time fix included | `082b3c6` | Clean; no other findings |
-| 4 | Basic HUD, reset, acceptance, and handoff | Not started | — | — |
+| 3 | Keyboard/touch control, camera, and B1 simulation | Implemented, independently reviewed, committed, and pushed | `082b3c6` (checkpoint `e6f02a7`) | Clean; no other findings |
+| 4 | Basic HUD, reset, acceptance, and handoff | Not started; next task | — | — |
 
 ## Task 1 Checkpoint
 
@@ -56,8 +56,8 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 - Second plan review found three implementation clarifications: pin Three.js r128 and document local bundling in place of cdnjs; identify the Sikka camera as a B2 presentation inference; keep manual browser checks on the fixed Quick Match fixture. The plan was updated with all three.
 - Final independent plan review: clean, no actionable findings. Task 1 independent implementation review: clean, no actionable findings. Reviewer reran the 63-test Node suite and production build successfully; the local HTTP smoke limitation is accurately recorded.
 - Task 2 independent implementation review: clean, no code/scope findings; reviewer confirmed 68/68 tests and production build. Task 2 was committed/pushed through checkpoint `c562467`. Browser/WebGL screenshots remain outstanding.
-- Task 3 implementation is independently reviewed clean with 75/75 tests and a passing production build. The owner-approved stop-time deviation is documented in the plan and report. Commit/push Task 3 before starting Task 4.
+- Task 3 implementation is independently reviewed clean with 75/75 tests and a passing production build. The owner-approved stop-time deviation is documented in the plan and report. Task 3 is pushed through `e6f02a7`; Task 4 is next.
 
 ## Handoff Rule
 
-Before each task, read the plan and this ledger, confirm branch/HEAD/working tree, and compare the owner-supplied master plan with read-only `sources/` and `master.txt`. Tasks 1–2 are cleanly reviewed and pushed. Task 3 is cleanly reviewed and ready to commit/push; its only B1 change is the owner-approved §25 stop-time correction. Manual browser/WebGL validation remains outstanding and must be reported accurately. Never repeat B1 unless a concrete regression is found and separately documented.
+Before each task, read the plan and this ledger, confirm branch/HEAD/working tree, and compare the owner-supplied master plan with read-only `sources/` and `master.txt`. Tasks 1–3 are cleanly reviewed and pushed. Start Task 4; no Task 4 implementation changes exist at this checkpoint. Manual browser/WebGL validation remains outstanding and must be reported accurately. Never repeat completed tasks unless a concrete regression is found and separately documented.
