@@ -1,0 +1,16 @@
+:root {
+  color: #f3f5ef;
+  background: #101914;
+  font-family: system-ui, sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; }
+main { width: min(100% - 2rem, 70rem); margin: 2rem auto; }
+h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+#game-status { min-height: 1.5rem; color: #c3d1c6; }
+#game-status[data-state='webgl-unavailable'] { color: #ffcf87; }
+#game-root { width: 100%; min-height: 20rem; overflow: hidden; border: 1px solid #43574a; background: #14221d; }
+#game-root canvas { display: block; width: 100%; height: 30rem; }
