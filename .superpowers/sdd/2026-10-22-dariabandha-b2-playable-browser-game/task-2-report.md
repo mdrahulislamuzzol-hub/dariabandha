@@ -1,6 +1,6 @@
 # B2 Task 2 — 4v4 Grey-Box Court and Player View
 
-Status: implementation independently reviewed clean; ready to commit/push. No commit hash yet. Manual browser/WebGL validation remains outstanding.
+Status: implementation independently reviewed clean and committed/pushed at checkpoint `c562467` (implementation commit `cd6acd1`). Manual browser/WebGL validation remains outstanding.
 
 ## Implementation
 
@@ -20,7 +20,7 @@ Status: implementation independently reviewed clean; ready to commit/push. No co
 
 ## Review and next steps
 
-- Independent review: clean; reviewer confirmed 68/68 tests and production build, with no code/scope findings.
+- Independent review: clean; reviewer confirmed 68/68 tests and production build, with no code/scope findings. The task was subsequently committed/pushed through checkpoint `c562467`.
 - Manual screenshot checklist: `task-2-manual-checklist.md`.
 - Browser/WebGL screenshots remain outstanding; the checklist is prepared but not completed.
-- Next action: commit/push Task 2. Start Task 3 only after the parent records the commit/push.
+- Task 3 began after the Task 2 commit/push checkpoint.

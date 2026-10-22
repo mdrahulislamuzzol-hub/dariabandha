@@ -110,7 +110,11 @@ export function stepMatch(state, inputsBySeat = {}) {
     const accelTicks = player.role === 'guard' ? GUARD_TIME_TO_SPEED_TICKS : ATTACKER_TIME_TO_RUN_SPEED_TICKS;
     const stopTicks = player.role === 'guard' ? GUARD_STOP_TIME_TICKS : ATTACKER_STOP_TIME_TICKS;
     const targetSpeed = Math.hypot(target.x, target.z);
-    const maxDelta = (targetSpeed > 0 ? targetSpeed / accelTicks : Math.max(Math.hypot(player.velocity.x, player.velocity.z), 0.001) / stopTicks);
+    // §25 stop time is a maximum from the role's top speed. A proportional
+    // decrement based on current velocity would approach zero asymptotically
+    // and never stop within the documented tick count.
+    const stopDelta = (player.role === 'guard' ? GUARD_RUN_SPEED_METRES_PER_SECOND : ATTACKER_SPRINT_SPEED_METRES_PER_SECOND) / stopTicks;
+    const maxDelta = (targetSpeed > 0 ? targetSpeed / accelTicks : stopDelta);
     const magnitude = Math.hypot(player.velocity.x, player.velocity.z);
     if (targetSpeed === 0 && magnitude > 0) {
       const newMagnitude = Math.max(0, magnitude - maxDelta);

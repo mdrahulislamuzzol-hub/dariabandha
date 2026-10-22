@@ -12,5 +12,11 @@ main { width: min(100% - 2rem, 70rem); margin: 2rem auto; }
 h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
 #game-status { min-height: 1.5rem; color: #c3d1c6; }
 #game-status[data-state='webgl-unavailable'] { color: #ffcf87; }
-#game-root { width: 100%; min-height: 24rem; overflow: hidden; border: 1px solid #43574a; background: #14221d; }
+#game-root { position: relative; width: 100%; min-height: 24rem; overflow: hidden; border: 1px solid #43574a; background: #14221d; touch-action: none; }
 #game-root canvas { display: block; width: 100%; height: 40rem; }
+.game-controls { position: absolute; inset: auto 1rem 1rem; display: flex; justify-content: space-between; align-items: end; gap: 1rem; pointer-events: none; user-select: none; }
+.touch-stick { width: 7rem; height: 7rem; border: 2px solid #d7e5d9; border-radius: 50%; background: #101914bb; display: grid; place-items: center; color: white; font-weight: 700; touch-action: none; pointer-events: auto; }
+.touch-actions { display: flex; gap: .65rem; pointer-events: auto; }
+.touch-actions button { min-width: 6rem; min-height: 4.25rem; border: 2px solid #d7e5d9; border-radius: .75rem; background: #101914dd; color: white; font: inherit; font-weight: 700; touch-action: none; }
+.touch-actions button:active { background: #526d59; }
+@media (hover: hover) and (pointer: fine) { .game-controls { opacity: .62; } }

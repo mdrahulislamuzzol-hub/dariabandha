@@ -3,14 +3,15 @@
 Canonical status is maintained in `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`. Keep this detailed implementation/review log synchronized with that authoritative ledger; do not use this file as a conflicting checkpoint.
 
 Plan: `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md`  
-Base: `codex/dariabandha-b1` at `6cc52b2`
+Base: `codex/dariabandha-b1` at Task 3 start `c562467`
 Workflow: sequential implementer → independent reviewer → fixes → fresh re-review. Do not start a task until its predecessor is cleanly reviewed. Do not push an unreviewed task.
 
 ## Task status
 
 - Task 1 — Browser Shell and Fixed-Tick Bridge: independently reviewed clean, committed, and pushed as `6cc52b2`; reviewer reran Node tests (63/63) and production build successfully. HTTP/browser smoke was attempted but sandbox access denied local socket access. See `task-1-report.md`.
-- Task 2 — 4v4 Grey-Box Court and Player View: independently reviewed clean (68/68 tests, production build, no code/scope findings); ready to commit/push. No commit hash yet. Manual browser/WebGL validation remains outstanding. See `task-2-report.md` and `task-2-manual-checklist.md`.
-- Tasks 3–4: not started.
+- Task 2 — 4v4 Grey-Box Court and Player View: independently reviewed clean and committed/pushed through checkpoint `c562467` (implementation commit `cd6acd1`); 68/68 tests and production build passed. Manual browser/WebGL validation remains outstanding. See `task-2-report.md` and `task-2-manual-checklist.md`.
+- Task 3 — Keyboard/Touch Control, Camera, and B1 Simulation: implementation independently reviewed clean; focused tests 7/7, full suite 75/75, production build passes; commit/push pending. See `task-3-report.md`.
+- Task 4: not started.
 
 ## Task 1 implementation notes
 
@@ -32,3 +33,13 @@ Workflow: sequential implementer → independent reviewer → fixes → fresh re
 - Focused Task 2 tests: 5/5. Full suite: 68/68. Production build succeeds; Vite notes the minified main chunk (638.07 kB, 165.57 kB gzip) exceeds its default 500 kB advisory threshold. Direct bundled Node invocation was used because npm was not on PATH.
 - Manual browser/WebGL validation remains unperformed. The initial-spawn and both-court-ends screenshot checklist is `task-2-manual-checklist.md`.
 - Independent review is clean: 68/68 tests and the production build pass; no code or scope findings. Task 2 is ready to commit/push, with commit hash pending. Manual browser/WebGL validation remains outstanding. No files under `sources/` changed.
+
+## Task 3 implementation notes
+
+- Added `src/browser/input.js`: keyboard movement (WASD/arrows), sprint and tag; pointer joystick and large sprint/tag buttons; normalized diagonal movement; deterministic nearest active opposing attacker selection inside the camera's horizontal view cone with distance then seat tie-break. Occlusion is not modeled. Because B1 does not define guard FOV, target visibility uses the attacker's 70° FOV as a documented B2 horizontal-cone inference. The same normalized input record reaches the B1 coordinator and simulation.
+- Joystick pointer capture is released on pointerup, pointercancel, lost capture, and window blur. `touch-action: none` applies to the game surface and controls. A queued tag survives render frames until the next authoritative tick; coordinator consumes a tag at most once even when catch-up advances multiple ticks.
+- Added `src/browser/role-camera.js` and browser-loop integration. Attacker camera uses B1 distance/height/pitch/FOV. Guard camera uses B1 distance/height and clamps its down-spine view to B1's ±25° yaw limit. Sikka inherits guard distance/height/yaw as a clearly labeled B2 presentation inference because B1 has no Sikka camera constants.
+- Coordinator stores the human seat once, so role transitions never change the controlled identity. The test applies a B1 tag/daan transition that makes attacker seat 0 Sikka and confirms the same seat remains human. Only the human seat is supplied to B1; all seven AI seats receive no input.
+- Focused Task 3 suite: 7/7. Full Node suite: 75/75. Vite production build passes (19 modules, 643.60 kB minified / 167.50 kB gzip) with default >500 kB advisory. Manual WebGL/browser/touch-device checks were not possible in this execution; no live behavior claim is made.
+- §25 source wording: “Attacker — Time to run speed / stop time — 18 ticks / 12 ticks” and “Guard — Time to speed / stop time — 6 ticks / 5 ticks.” Initial measurement showed B1's proportional decrement left 2.252772 m/s from a 6.4 m/s attacker after 12 neutral ticks. The owner approved a scoped deviation in `src/rules/simulation.js`: neutral braking now subtracts `roleTopSpeed / stopTimeTicks` each tick. Tests verify a top-speed attacker reaches zero on tick 12 and a top-speed guard reaches zero on tick 5. Acceleration, movement caps, stamina and other rules are unchanged.
+- Independent Task 3 review is clean; reviewer reran 75/75 tests and production build. The review's plan-status and window-blur coverage suggestions were addressed. No `sources/` files changed. Implementation is not yet committed or pushed. Next: commit/push, then Task 4.

@@ -1,9 +1,11 @@
 # Dariabandha B2 Grey-Box Game Plan
 
-**Status:** Final plan review clean; Task 1 is pushed and Task 2 is independently reviewed clean, ready to commit/push. Manual browser/WebGL validation remains outstanding. See the canonical status ledger at `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`.
+**Status:** Final plan review clean; Tasks 1–2 are pushed. Task 3 implementation and the owner-approved §25 stop-time correction are independently reviewed clean; commit/push is pending. Manual browser/WebGL validation remains outstanding. See the canonical status ledger at `docs/superpowers/progress/2026-10-22-dariabandha-b2-progress.md`.
 **Master-plan milestone:** B2 Grey-box game (§23).  
 **Base:** `codex/dariabandha-b1` at B1-complete commit `113d739`.  
 **Goal:** Deliver the master plan's first playable browser scene: a 4v4 Dariabandha court with capsule players, movement, stamina, role-appropriate camera, keyboard/touch input, a basic HUD, and seven inactive AI-controlled seats.
+
+**Approved Task 3 tuning deviation:** The owner authorized correcting B1 stopping behavior to meet §25's maximum stop times. Braking now uses a fixed per-role top-speed decrement so an attacker at sprint speed reaches zero within 12 ticks and a guard at run speed reaches zero within 5 ticks. No other rules are changed. Regression tests cover both roles; see the Task 3 report and progress ledger.
 
 ## Source Reconciliation and Authority
 
