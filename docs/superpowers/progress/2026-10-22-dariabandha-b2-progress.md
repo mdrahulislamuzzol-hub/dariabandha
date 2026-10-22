@@ -20,7 +20,7 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 | Task | Scope | Status | Implementation commit | Independent review |
 |---|---|---|---|---|
 | 1 | Browser shell and fixed-tick bridge | Implemented; reviewed clean | `4a6c923` (implementation `914eb39`) | Clean; no actionable findings |
-| 2 | 4v4 grey-box court and player view | Implemented; independently reviewed clean; ready to commit/push | Pending | Clean; no code/scope findings |
+| 2 | 4v4 grey-box court and player view | Implemented; reviewed clean | `cd6acd1` | Clean; no code/scope findings |
 | 3 | Keyboard/touch control, camera, and B1 simulation | Not started | — | — |
 | 4 | Basic HUD, reset, acceptance, and handoff | Not started | — | — |
 
