@@ -21,7 +21,7 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 |---|---|---|---|---|
 | 1 | Browser shell and fixed-tick bridge | Implemented; reviewed clean | `4a6c923` (implementation `914eb39`) | Clean; no actionable findings |
 | 2 | 4v4 grey-box court and player view | Implemented, reviewed, committed, and pushed | `cd6acd1` (checkpoint `c562467`) | Clean; no code/scope findings |
-| 3 | Keyboard/touch control, camera, and B1 simulation | Implemented; reviewed clean; commit/push pending; approved §25 stop-time fix included | — | Clean; no other findings |
+| 3 | Keyboard/touch control, camera, and B1 simulation | Implemented; reviewed clean; approved §25 stop-time fix included | `082b3c6` | Clean; no other findings |
 | 4 | Basic HUD, reset, acceptance, and handoff | Not started | — | — |
 
 ## Task 1 Checkpoint
