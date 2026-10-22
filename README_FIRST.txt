@@ -1,33 +1,24 @@
-DARIABANDHA PROJECT — RESUME CHECKPOINT
+DARIABANDHA — CURRENT HANDOFF
 
-Checkpoint date: 2026-10-22
-Approved milestone: B1 deterministic rules core, renderer-free
-Approved workflow: subagent-driven, task-by-task with independent review
+Updated: 2026-10-22
+Repository: https://github.com/mdrahulislamuzzol-hub/dariabandha
+Current branch: codex/dariabandha-b1
+Current checkpoint: B1 at 113d739; B2 plan and handoff are being committed now; B2 implementation not started
+Workflow: sequential subagent-driven implementation, independent review, fixes and fresh re-review for each task. Push each reviewed task to GitHub.
 
-Completed
-- Task 1: Node ES-module runtime, shared tuning/format/profile constants, and strict reference validation.
-- Task 1 implementation commit: 4489188c11cba49787f138403e400aaba18584a2.
-- Task 1 review fix commit: 5c5ff92e885cd5a1c34a22c25416d6ba418a4bdf.
-- Review finding on profile timing-shape validation was fixed and re-reviewed cleanly.
-- Task 1 report records focused and full test runs: 10 passed, 0 failed after the fix.
+B1 status
+- B1 renderer-free deterministic rules core is complete. Its approved task groups and the user-requested Sikka/spine vacancy, smaller-format guard placement, seeded toss, and constants-test follow-ups are recorded in `.superpowers/sdd/2026-10-22-dariabandha-b1-rules-core/`.
+- Latest verified suite: 59 tests pass. The independent review of the latest B1 follow-up is clean.
+- B1 plan: `docs/superpowers/plans/2026-10-22-dariabandha-b1-rules-core.md`.
 
-Continuation status (updated 2026-10-22)
-- Tasks 1–4 of the approved B1 renderer-free rules core are complete.
-- A user-directed follow-up resolved the Sikka spine-line foul vacancy consequence and smaller-format guard placement. The 2v2 placement is documented as an implementation inference.
-- The Sikka role-change spawn fix has been independently re-reviewed; the full suite passes 48 tests.
-- Read .superpowers/sdd/2026-10-22-dariabandha-b1-rules-core/progress.md and task reports for the exact checkpoint and remaining deferred items.
+Next work
+- Read `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md` in full. It defines four sequential B2 task groups, scope boundaries, interfaces, acceptance gates, and the review/push process.
+- The master plan formally defines B2 as Grey-box game in §23. The repository plan breaks B2 into four reviewed tasks; it does not expand B2 into later AI, menu, presentation, tutorial, performance/release, or online milestones.
+- Note: root `master.txt` omits the full B1–B9 table. Read the supplied read-only v2.0 and v2.1 DOCX sources in `sources/` before implementation and compare them with `master.txt`.
+- Start at B2 Task 1 only after confirming the current branch/HEAD and clean working tree. Do not redo B1. Use the B1 APIs/tests as existing contracts and update the B2 ledger/report after every task.
+- Before implementation, compare the master plan the owner supplies with the read-only reference text in `master.txt` and any `sources/` files. Record any differences in the B2 ledger. Treat all files under `sources/` as read-only.
 
-Current git checkpoint
-- Branch: codex/dariabandha-b1
-- Latest commit: 5c5ff92e885cd5a1c34a22c25416d6ba418a4bdf
-- Previous implementation commit: 4489188c11cba49787f138403e400aaba18584a2
-- Plan commit: 9ac8e4101e19e4042f96767703dd4dcc39fdf48e
-- No GitHub remote/push has been configured. The ZIP is a portable project snapshot containing the plan, sources, current code, tests, and progress reports. It does not automatically synchronize between accounts.
-
-How to resume in a new account/project
-1. Add Dariabandha_Resume_Package.zip to the new project or upload it in the new chat.
-2. Paste the contents of RESUME_PROMPT.txt.
-3. The new assistant should inspect/extract the package into its workspace and continue Task 2 from this checkpoint.
-
-Reference safety
-- The original project instructions say sources/ is read-only. The archive includes copies solely as read-only reference context; do not modify those files.
+Safety and scope
+- Do not start later B3 content, online play, publish/host, merge, or connect external services without explicit approval.
+- Keep the rules core renderer-independent. Browser/Three.js code belongs in presentation/platform modules; no renderer imports in `src/rules/`.
+- Keep GitHub current after each task has passed independent review. Do not push an unreviewed task.
