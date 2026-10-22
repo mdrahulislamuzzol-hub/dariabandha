@@ -1,15 +1,16 @@
 # B2 Task 4 Manual Browser Checklist
 
-Status: attempted; blocked before the game page loaded. Do not treat the manual acceptance items below as passed.
+Status: partially verified in Chrome; B2 manual acceptance remains incomplete. Do not treat unchecked items as passed.
 
 ## Environment and attempt
 
-- Browser: Codex in-app browser.
+- Browser: Google Chrome on the host Windows device (browser version not recorded).
 - Host OS: Windows.
-- Viewport resolution: not recorded because navigation timed out before the app loaded.
-- Server: Vite 6.4.5 reported ready at `http://127.0.0.1:4173/`.
+- Viewport resolution: not recorded; the captured Chrome window was 656 × 720 pixels and the game page was scrolled to the scene.
+- Server: Vite 6.4.5 reported ready at `http://127.0.0.1:4173/` with host access enabled.
 - Browser result: `ERR_CONNECTION_TIMED_OUT` (“127.0.0.1 took too long to respond”). Retried after starting the local server outside the sandbox; same result.
 - Follow-up attempt: Vite was bound to `0.0.0.0:4173` and reported the machine address `http://192.168.1.100:4173/`; opening that URL in the same in-app browser returned `net::ERR_ABORTED` before the game loaded.
+- Chrome follow-up: after starting Vite with host access, Chrome loaded `http://127.0.0.1:4173/`. Its accessibility tree showed the game page, HUD, and controls; the captured scene showed the rendered court, line markings, role markers, and player figures. The HUD reported Sikka / Team 1, playing, 0–0, half 1, stamina 100%, and the latest call. Clock was observed counting down. Reset could not be exercised because the Chrome window became minimized to the automation target; startup and performance timings were not measured.
 - Startup/frame-time/memory: not measured. WebGL and device/touch capability were not reached.
 
 ## Checklist
@@ -18,9 +19,10 @@ Status: attempted; blocked before the game page loaded. Do not treat the manual 
 - [x] Attempt to open the local URL in the available in-app browser.
 - [x] Retry with the server started outside the sandbox.
 - [x] Retry through the machine's network interface with Vite bound to `0.0.0.0`.
-- [ ] Confirm the game DOM and HUD are visible in a browser.
-- [ ] Confirm WebGL scene starts and the 4v4 court/all eight players render.
-- [ ] Verify HUD role/team, phase, score, clock, stamina, and latest call in the live page.
+- [x] Confirm the game DOM and HUD are visible in Chrome.
+- [x] Confirm the WebGL scene starts and the court, line markings, role markers, and player figures render.
+- [ ] Visually confirm all eight players render without overlap/occlusion.
+- [x] Verify HUD role/team, phase, score, clock, stamina, and latest call in the live page.
 - [ ] Click Reset match after changing the fixture state; confirm the same initial seed/setup/controlled seat returns and the toss is unchanged.
 - [ ] Exercise keyboard attacker, guard, and Sikka fixtures in the browser.
 - [ ] Exercise touch controls on a phone or emulator.
@@ -29,4 +31,4 @@ Status: attempted; blocked before the game page loaded. Do not treat the manual 
 
 ## Acceptance result
 
-B2 browser/manual acceptance remains incomplete. The in-app browser could not reach the host's local loopback server even when the server process was started outside the sandbox. No browser interaction, WebGL render, keyboard/touch behavior, or screenshot is claimed as verified.
+B2 browser/manual acceptance remains incomplete. Chrome on the host device loaded the local game and confirmed the page/HUD and a rendered court scene. Reset behavior, visual confirmation of all eight players, keyboard fixtures, touch controls, court-end screenshots, and performance measurements remain unverified. The earlier in-app browser connectivity failures and the Chrome follow-up are recorded above.
