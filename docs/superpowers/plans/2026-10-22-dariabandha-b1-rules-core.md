@@ -75,12 +75,12 @@
 - Create: `tests/rules/simulation.test.js`
 
 **Interfaces:**
-- `createMatch({profileId, profileVersion, format, seed, seats}) -> MatchState` creates a fully initialized state.
+- `createMatch({profileId, profileVersion, format, seed, seats}) -> MatchState` creates a fully initialized state. `seats` is the canonical opening-role template: team 0 is all attackers, team 1 has one Sikka and its other players as guards; a seeded opening toss selects the attacker team and mirrors roles by within-team seat ordinal when needed.
 - `stepMatch(state, inputsBySeat) -> {state, events}` advances exactly one authoritative tick and returns ordered rule events.
 - `advanceFrame(accumulator, deltaSeconds, state, inputProvider) -> {accumulator, state, events, steps}` caps catch-up at 5 steps and never changes tick duration.
 
 - [x] Define serializable match and player state, including phase, match clock, scores, roles, positions, velocities, stamina, cooldowns, and eliminated seats.
-- [ ] Implement deterministic seeded random values where the spec allows variation; isolate randomness from rendering. (Deferred: current B1 inputs carry resolved seat roles, and no random simulation action is defined; see task-3-report.md.)
+- [x] Implement deterministic seeded random values where the spec allows variation; isolate randomness from rendering. Opening team selection consumes one Mulberry32 draw from the uint32 seed; the winner-attacks policy and mirrored Sikka ordinal are B1 implementation inferences, documented in task-3-report.md.
 - [x] Implement input validation and canonical seat ordering before each tick.
 - [x] Implement normalized movement, acceleration, stopping, stamina drain/recovery, and court-boundary outcomes from §§9–10 and §22.
 - [x] Verify deterministic state and event ordering for identical seeds and inputs.

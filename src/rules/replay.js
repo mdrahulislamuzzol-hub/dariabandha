@@ -1,4 +1,4 @@
-import { createMatch } from './state.js';
+import { createMatch, restoreLegacyReplayMatch } from './state.js';
 import { stepMatch } from './simulation.js';
 
 const clone = (value) => structuredClone(value);
@@ -35,6 +35,9 @@ export function recordReplayHeader(state, options = {}) {
     timingShape: state.timingShape,
     map,
     seed: state.random.seed,
+    randomState: state.random.state,
+    toss: clone(state.toss),
+    tossTemplateSeats: clone(state.tossTemplateSeats),
     seats: state.players.map(({ seat, team, controller, role }) => ({ seat, team, controller, role, aiTier: aiTiers[seat] ?? 'standard' })),
   };
   validateHeaderTiers(header.seats);
@@ -68,9 +71,37 @@ export function replayMatch(replay) {
   if (typeof h.map !== 'string' || h.map.length === 0) throw new TypeError('replay header map must be a non-empty string');
   if (!Array.isArray(h.seats)) throw new TypeError('replay header seats must be an array');
   validateHeaderTiers(h.seats);
-  const createArgs = { profileId: h.profileId, profileVersion: h.profileVersion, format: h.format, seed: h.seed, seats: h.seats.map(({ seat, team, controller, role }) => ({ seat, team, controller, role })) };
+  const hasTossTemplate = Object.hasOwn(h, 'tossTemplateSeats');
+  if (hasTossTemplate && !Array.isArray(h.tossTemplateSeats)) throw new TypeError('replay header tossTemplateSeats must be an array');
+  if (hasTossTemplate) {
+    if (!Object.hasOwn(h, 'toss') || !h.toss || typeof h.toss !== 'object' || Array.isArray(h.toss)) {
+      throw new TypeError('replay header toss must be an object');
+    }
+    if (h.toss.algorithm !== 'mulberry32') throw new RangeError('replay header toss.algorithm must be mulberry32');
+    if (!Number.isInteger(h.toss.winnerTeam) || ![0, 1].includes(h.toss.winnerTeam)) throw new RangeError('replay header toss.winnerTeam must be 0 or 1');
+    if (!Number.isInteger(h.toss.attackerTeam) || ![0, 1].includes(h.toss.attackerTeam)) throw new RangeError('replay header toss.attackerTeam must be 0 or 1');
+    if (h.toss.attackerTeam !== h.toss.winnerTeam) throw new RangeError('replay header toss.attackerTeam must match winnerTeam');
+    if (!Number.isFinite(h.toss.draw) || h.toss.draw < 0 || h.toss.draw >= 1) throw new RangeError('replay header toss.draw must be in [0, 1)');
+    if (!Object.hasOwn(h, 'randomState') || !Number.isInteger(h.randomState) || h.randomState < 0 || h.randomState > 0xffffffff) {
+      throw new RangeError('replay header randomState must be an unsigned 32-bit integer');
+    }
+  }
+  const createArgs = { profileId: h.profileId, profileVersion: h.profileVersion, format: h.format, seed: h.seed, seats: (h.tossTemplateSeats ?? h.seats).map(({ seat, team, controller, role }) => ({ seat, team, controller, role })) };
   if (h.profileId === 'pro') createArgs.timingShape = h.timingShape;
-  const state = createMatch(createArgs);
+  const state = hasTossTemplate ? createMatch(createArgs) : restoreLegacyReplayMatch(createArgs);
+  if (h.tossTemplateSeats !== undefined) {
+    const resolvedSeats = (seats) => seats.map(({ seat, team, controller, role }) => ({ seat, team, controller, role }))
+      .sort((a, b) => a.seat - b.seat);
+    if (JSON.stringify(resolvedSeats(h.seats)) !== JSON.stringify(resolvedSeats(state.players))) {
+      throw new RangeError('replay resolved seats do not match the toss result and template');
+    }
+  }
+  if (hasTossTemplate && h.randomState !== state.random.state) {
+    throw new RangeError('replay random state does not match its seed and opening toss');
+  }
+  if (hasTossTemplate && (h.toss.algorithm !== state.toss.algorithm || h.toss.winnerTeam !== state.toss.winnerTeam || h.toss.attackerTeam !== state.toss.attackerTeam || h.toss.draw !== state.toss.draw)) {
+    throw new RangeError('replay toss result does not match its seed and template');
+  }
   state.map = h.map;
   let current = state;
   for (let index = 0; index < replay.inputs.length; index += 1) {

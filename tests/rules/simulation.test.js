@@ -14,7 +14,7 @@ function seats2v2() {
 }
 
 function makeState() {
-  return createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 17, seats: seats2v2() });
+  return createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 0, seats: seats2v2() });
 }
 
 test('createMatch validates and canonicalizes seats into serializable initialized state', () => {
@@ -30,13 +30,29 @@ test('createMatch validates and canonicalizes seats into serializable initialize
   assert.throws(() => createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 1, seats: [...seats2v2(), seats2v2()[0]] }), /exactly 4 players/);
 });
 
+test('Mulberry32 seeded toss chooses either opening side and maps the template Sikka ordinal', () => {
+  const teamZero = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 0, seats: seats2v2() });
+  const teamOne = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 1, seats: seats2v2() });
+  assert.equal(teamZero.toss.winnerTeam, 0);
+  assert.equal(teamZero.attackerTeam, 0);
+  assert.deepEqual(teamZero.players.filter((p) => p.team === 1).map((p) => p.role), ['sikka', 'guard']);
+  assert.equal(teamOne.toss.winnerTeam, 1);
+  assert.equal(teamOne.attackerTeam, 1);
+  assert.deepEqual(teamOne.players.filter((p) => p.team === 0).map((p) => p.role), ['sikka', 'guard']);
+  assert.equal(teamOne.players.filter((p) => p.role === 'attacker').length, 2);
+  assert.equal(teamOne.players.find((p) => p.role === 'sikka').position.x, 0);
+  assert.ok(teamOne.eventLog[0].type === 'toss-resolved');
+  assert.ok(teamOne.random.state !== teamOne.random.seed);
+  assert.deepEqual(teamOne, createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 1, seats: seats2v2() }));
+});
+
 test('sparse seat IDs do not change a guard lane between spawn and the first tick', () => {
   const seats = [
     ...[1, 7, 12, 18, 24, 29].map((seat) => ({ seat, team: 0, role: 'attacker' })),
     ...[101, 205, 309, 412, 518].map((seat) => ({ seat, team: 1, role: 'guard' })),
     { seat: 900, team: 1, role: 'sikka' },
   ];
-  const state = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '6v6', seed: 1, seats });
+  const state = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '6v6', seed: 0, seats });
   const guards = state.players.filter((player) => player.role === 'guard');
   for (const [index, guard] of guards.entries()) assert.ok(Math.abs(guard.position.z - (state.court.laneStrips[index].zMin + 0.13)) < 1e-12);
   const next = stepMatch(state, {}).state;
@@ -44,7 +60,7 @@ test('sparse seat IDs do not change a guard lane between spawn and the first tic
 });
 
 test('Pro timing selector defaults to standard, accepts quick, and rejects invalid selectors', () => {
-  const args = { profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 2, seats: seats2v2() };
+  const args = { profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 0, seats: seats2v2() };
   const standard = createMatch(args);
   const quick = createMatch({ ...args, timingShape: 'quick' });
   assert.equal(standard.timingShape, 'standard');

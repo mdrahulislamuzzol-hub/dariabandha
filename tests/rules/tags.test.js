@@ -4,7 +4,7 @@ import { beginTag, resolveTags } from '../../src/rules/tags.js';
 import { createMatch } from '../../src/rules/state.js';
 
 function state() {
-  const s = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 4, seats: [
+  const s = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 0, seats: [
     { seat: 0, team: 0, role: 'attacker' }, { seat: 1, team: 0, role: 'attacker' },
     { seat: 2, team: 1, role: 'sikka' }, { seat: 3, team: 1, role: 'guard' },
   ] });

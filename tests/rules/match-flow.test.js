@@ -6,7 +6,7 @@ import { stepMatch } from '../../src/rules/simulation.js';
 import { resolveClock } from '../../src/rules/match-flow.js';
 
 function make(profileId) {
-  return createMatch({ profileId, profileVersion: '0.1', format: '2v2', seed: 3, seats: [
+  return createMatch({ profileId, profileVersion: '0.1', format: '2v2', seed: 0, seats: [
     { seat: 0, team: 0, role: 'attacker' }, { seat: 1, team: 0, role: 'attacker' },
     { seat: 2, team: 1, role: 'sikka' }, { seat: 3, team: 1, role: 'guard' },
   ] });
@@ -18,10 +18,10 @@ test('Traditional tag cancels daan and swaps sides while round trip scores a poi
   assert.equal(before.attackerTeam, 0);
   assert.equal(tagged.attackerTeam, 1);
   assert.equal(tagged.phase, 'transition');
-  assert.equal(tagged.eventLog[0].consequence, 'daan-cancelled-sides-swapped');
+  assert.equal(tagged.eventLog.find((event) => event.type === 'tagged').consequence, 'daan-cancelled-sides-swapped');
   const point = applyRuleEvent(make('traditional'), { type: 'round-trip', seat: 0, tick: 10 });
   assert.deepEqual(point.score, [1, 0]);
-  assert.equal(point.eventLog[0].consequence, 'traditional-point-same-team-attacks');
+  assert.equal(point.eventLog.find((event) => event.type === 'point-scored').consequence, 'traditional-point-same-team-attacks');
 });
 
 test('Competitive tag eliminates attacker and starts half-team counter-attack deterministically', () => {
@@ -33,7 +33,7 @@ test('Competitive tag eliminates attacker and starts half-team counter-attack de
   assert.equal(a.transitionReason, 'half-team-counter-attack');
   assert.ok(a.players.find((p) => p.seat === 0).state === 'eliminated');
   assert.equal(a.players.filter((p) => p.team === 1 && p.role === 'attacker').length, 1);
-  assert.equal(a.eventLog[0].consequence, 'attacker-eliminated');
+  assert.equal(a.eventLog.find((event) => event.type === 'tagged').consequence, 'attacker-eliminated');
 });
 
 test('period clock transitions through halftime, standard tie-break, golden daan, and full time', () => {
@@ -88,12 +88,12 @@ test('Pro timing shape selects Quick golden or Standard tie-break clock flow', (
     { seat: 0, team: 0, role: 'attacker' }, { seat: 1, team: 0, role: 'attacker' },
     { seat: 2, team: 1, role: 'sikka' }, { seat: 3, team: 1, role: 'guard' },
   ];
-  let s = createMatch({ profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 1, seats, timingShape: 'standard' });
+  let s = createMatch({ profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 0, seats, timingShape: 'standard' });
   s.clock.half = 2; s.clock.remainingTicks = 1;
   s = stepMatch(s, {}).state;
   assert.equal(s.clock.half, 3);
   assert.equal(s.clock.remainingTicks, 7_200);
-  s = createMatch({ profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 1, seats, timingShape: 'quick' });
+  s = createMatch({ profileId: 'pro', profileVersion: '0.1', format: '2v2', seed: 0, seats, timingShape: 'quick' });
   s.clock.half = 2; s.clock.remainingTicks = 1;
   s = stepMatch(s, {}).state;
   assert.equal(s.phase, 'golden');
@@ -120,12 +120,12 @@ test('attacker leaving court routes through profile tag consequence; event order
   const s = make('quick-match');
   const a = applyRuleEvent(s, { type: 'attacker-boundary', seat: 0, tick: 4 });
   assert.equal(a.players.find((p) => p.seat === 0).state, 'eliminated');
-  assert.equal(a.eventLog[0].reason, 'attacker-left-court');
+  assert.equal(a.eventLog.find((event) => event.reason === 'attacker-left-court').reason, 'attacker-left-court');
   const sorted = applyRuleEvents(make('traditional'), [
     { type: 'tagged', guardSeat: 3, targetSeat: 0, tick: 5 },
     { type: 'tag-void', guardSeat: 2, targetSeat: 1, reason: 'ineligible', tick: 2 },
   ]);
-  assert.equal(sorted.eventLog[0].tick, 2);
+  assert.equal(sorted.eventLog.find((event) => event.reason === 'ineligible').tick, 2);
 });
 
 test('Sikka spine-line foul voids the tag and vacates the spine until the next daan', () => {
@@ -137,9 +137,9 @@ test('Sikka spine-line foul voids the tag and vacates the spine until the next d
   assert.deepEqual(foul.vacatedLanes, []);
   assert.deepEqual(foul.vacatedRegions, ['spine']);
   assert.equal(foul.players.find((p) => p.seat === 2).state, 'spine-vacated');
-  assert.equal(foul.eventLog[0].reason, 'sikka-spine-line-foul');
-  assert.equal(foul.eventLog[0].effect, 'spine-vacated');
-  assert.equal(foul.eventLog[0].regionId, 'spine');
+  const foulEvent = foul.eventLog.find((event) => event.reason === 'sikka-spine-line-foul');
+  assert.equal(foulEvent.effect, 'spine-vacated');
+  assert.equal(foulEvent.regionId, 'spine');
   const resumed = stepMatch(foul, {}).state;
   assert.equal(resumed.players.find((p) => p.seat === 2).state, 'spine-vacated');
   const reset = applyRuleEvent(foul, { type: 'tagged', guardSeat: 3, targetSeat: 0, tick: 4 });

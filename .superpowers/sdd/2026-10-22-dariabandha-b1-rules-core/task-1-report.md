@@ -31,6 +31,19 @@ DONE
 
 ---
 
+## Follow-up: complete §25 constants regression coverage
+
+### Status
+
+Implementation complete; no code constants changed.
+
+### Delivered and verified
+
+- Reorganized `tests/rules/constants.test.js` into readable groups covering all currently exported §25 movement, stamina, tag timing, clock/transition, Pro, camera, AI, and network tuning values, together with the exported unit, court, collision, and tag geometry values.
+- The constant-value suite passes as part of the full 59-test Node suite. Added exact shape/value assertions for `PROFILE_SPECS` and `TUNING_CONSTANTS` after independent review; toss/replay follow-up fix round 3 remains pending re-review.
+
+---
+
 ## Fix round 1: Profile timing-shape validation
 
 ### Status

@@ -54,7 +54,7 @@ test('guard placement scales across interior rows, retaining the approved 6v6 ba
       { seat: size * 2 - 1, team: 1, role: 'sikka' },
       ...Array.from({ length: size - 1 }, (_, i) => ({ seat: size + i, team: 1, role: 'guard' })),
     ];
-    const match = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format, seed: 1, seats });
+    const match = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format, seed: 0, seats });
     const actual = match.players.filter((player) => player.role === 'guard').map((player) => player.position.z);
     const expected = laneIds.slice(0, size - 1).map((id) => {
       const lane = court.laneStrips.find((entry) => entry.id === id);

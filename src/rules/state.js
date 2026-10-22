@@ -9,6 +9,7 @@ import {
 import { createCourt } from './court.js';
 import { getProfile } from './profiles.js';
 import { assertValidFormat } from './validation.js';
+import { drawMulberry32 } from './random.js';
 
 function finite(value, field) {
   if (!Number.isFinite(value)) throw new TypeError(`${field} must be a finite number`);
@@ -55,7 +56,7 @@ function initialPosition(player, court, guardLaneIndex = 0) {
 /** Creates a serializable, renderer-independent match state. Seat objects are
  * {seat, team, controller?, role}; seat IDs are canonicalized in ascending order.
  * Pro accepts timingShape 'standard' or 'quick'; it defaults to 'standard'. */
-export function createMatch({ profileId, profileVersion, format, seed, seats, timingShape }) {
+function initializeMatch({ profileId, profileVersion, format, seed, seats, timingShape }, legacyReplay = false) {
   finite(seed, 'seed');
   if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
     throw new RangeError('seed must be an unsigned 32-bit integer');
@@ -80,21 +81,46 @@ export function createMatch({ profileId, profileVersion, format, seed, seats, ti
     const teamPlayers = ordered.filter((p) => p.team === team);
     if (teamPlayers.length !== teamSize) throw new RangeError(`team ${team} must contain exactly ${teamSize} players`);
   }
-  // Team 0 begins the daan; the defending side has its Sikka and line guards.
-  if (ordered.filter((p) => p.team === 0 && p.role === 'attacker').length !== teamSize) {
-    throw new RangeError(`team 0 must have ${teamSize} attackers at match start`);
-  }
-  if (ordered.filter((p) => p.team === 1 && p.role === 'sikka').length !== 1) {
-    throw new RangeError('team 1 must have exactly one sikka at match start');
-  }
-  if (ordered.filter((p) => p.team === 1 && p.role === 'guard').length !== teamSize - 1) {
-    throw new RangeError(`team 1 must have exactly ${teamSize - 1} guards at match start`);
+  let toss;
+  let attackerTeam;
+  let roleSeats;
+  if (legacyReplay) {
+    // Pre-toss replay headers stored already-resolved roles and began with the
+    // seed as RNG state. Restore those values directly without consuming a draw.
+    const fullAttackerTeams = [0, 1].filter((team) => ordered.filter((p) => p.team === team && p.role === 'attacker').length === teamSize);
+    if (fullAttackerTeams.length !== 1) throw new RangeError('legacy replay seats must identify exactly one full attacking team');
+    attackerTeam = fullAttackerTeams[0];
+    const defenders = ordered.filter((p) => p.team !== attackerTeam);
+    if (defenders.filter((p) => p.role === 'sikka').length !== 1 || defenders.filter((p) => p.role === 'guard').length !== teamSize - 1) {
+      throw new RangeError('legacy replay defending team must have one sikka and the remaining guards');
+    }
+    roleSeats = ordered;
+  } else {
+    // Caller supplies the opening-role template; the seeded toss selects the
+    // attacker. Team 0 is the canonical template side, not a fixed winner.
+    if (ordered.filter((p) => p.team === 0 && p.role === 'attacker').length !== teamSize) {
+      throw new RangeError(`team 0 must have ${teamSize} attackers at match start`);
+    }
+    if (ordered.filter((p) => p.team === 1 && p.role === 'sikka').length !== 1) {
+      throw new RangeError('team 1 must have exactly one sikka at match start');
+    }
+    if (ordered.filter((p) => p.team === 1 && p.role === 'guard').length !== teamSize - 1) {
+      throw new RangeError(`team 1 must have exactly ${teamSize - 1} guards at match start`);
+    }
+    toss = drawMulberry32(seed >>> 0);
+    attackerTeam = toss.value < 0.5 ? 0 : 1;
+    const templateSikkaOrdinal = ordered.filter((p) => p.team === 1).findIndex((p) => p.role === 'sikka');
+    roleSeats = ordered.map((player) => {
+      if (player.team === attackerTeam) return { ...player, role: 'attacker' };
+      const ordinal = ordered.filter((p) => p.team === player.team).findIndex((p) => p.seat === player.seat);
+      return { ...player, role: ordinal === templateSikkaOrdinal ? 'sikka' : 'guard' };
+    });
   }
   const court = createCourt(format);
   const guardLaneBySeat = new Map();
-  ordered.filter((player) => player.team === 1 && player.role === 'guard')
+  roleSeats.filter((player) => player.team !== attackerTeam && player.role === 'guard')
     .forEach((player, index) => guardLaneBySeat.set(player.seat, index));
-  const players = ordered.map((player) => ({
+  const players = roleSeats.map((player) => ({
     ...player,
     position: initialPosition(player, court, guardLaneBySeat.get(player.seat) ?? 0),
     velocity: { x: 0, z: 0 },
@@ -110,18 +136,29 @@ export function createMatch({ profileId, profileVersion, format, seed, seats, ti
     timingShape: selectedTimingShape,
     court,
     phase: 'playing',
+    ...(legacyReplay ? {} : { toss: { algorithm: 'mulberry32', winnerTeam: attackerTeam, attackerTeam, draw: toss.value } }),
     tick: 0,
     clock: { ticks: 0, remainingTicks: halfTicks || profile.capTicks || null, half: 1 },
     halves: profile.halves,
     score: [0, 0],
-    attackerTeam: 0,
+    attackerTeam,
     players,
     vacatedLanes: [],
     vacatedRegions: [],
     eliminated: [],
     pendingTags: [],
-    eventLog: [],
-    random: { seed: seed >>> 0, state: seed >>> 0 },
+    eventLog: legacyReplay ? [] : [{ type: 'toss-resolved', reason: 'seeded-opening-toss', tick: 0, algorithm: 'mulberry32', winnerTeam: attackerTeam, attackerTeam, draw: toss.value }],
+    random: { seed: seed >>> 0, state: legacyReplay ? seed >>> 0 : toss.state },
+    ...(legacyReplay ? {} : { tossTemplateSeats: ordered.map(({ seat, team, controller, role }) => ({ seat, team, controller, role })) }),
     capsuleRadiusMetres: ATTACKER_CAPSULE_RADIUS_METRES,
   };
+}
+
+export function createMatch(args) {
+  return initializeMatch(args, false);
+}
+
+/** Restores a pre-toss replay's resolved roles and original pre-draw RNG state. */
+export function restoreLegacyReplayMatch(args) {
+  return initializeMatch(args, true);
 }

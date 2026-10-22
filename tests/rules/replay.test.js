@@ -4,12 +4,64 @@ import { createReplay, recordReplayHeader, recordTickInputs, replayMatch } from 
 import { createMatch } from '../../src/rules/state.js';
 import { stepMatch } from '../../src/rules/simulation.js';
 
-function make() {
-  return createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed: 14, seats: [
+function make(seed = 0) {
+  return createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '2v2', seed, seats: [
     { seat: 0, team: 0, controller: 'human', role: 'attacker' }, { seat: 1, team: 0, role: 'AI', role: 'attacker' },
     { seat: 2, team: 1, role: 'AI', role: 'sikka' }, { seat: 3, team: 1, role: 'AI', role: 'guard' },
   ] });
 }
+
+test('replay header preserves the toss template and deterministically reconstructs either toss outcome', () => {
+  const initial = make(1);
+  const replay = createReplay(initial);
+  assert.equal(replay.header.toss.winnerTeam, 1);
+  assert.equal(replay.header.randomState, initial.random.state);
+  assert.deepEqual(replay.header.tossTemplateSeats, initial.tossTemplateSeats);
+  const restored = replayMatch(replay);
+  delete restored.map;
+  assert.deepEqual(restored, initial);
+  replay.header.toss.winnerTeam = 0;
+  assert.throws(() => replayMatch(replay), /(toss result does not match|attackerTeam must match winnerTeam)/);
+  const mismatchedAttacker = createReplay(initial);
+  mismatchedAttacker.header.toss.attackerTeam = 0;
+  assert.throws(() => replayMatch(mismatchedAttacker), /attackerTeam must match winnerTeam/);
+  const mismatchedSeatRole = createReplay(initial);
+  mismatchedSeatRole.header.seats.find((seat) => seat.team === 0).role = 'attacker';
+  assert.throws(() => replayMatch(mismatchedSeatRole), /resolved seats do not match/);
+});
+
+test('legacy replay headers retain recorded roles, attacker team, and pre-toss RNG state', () => {
+  const state = make(1);
+  const replay = createReplay(state);
+  replay.header.seats = replay.header.tossTemplateSeats.map((seat) => ({ ...seat, aiTier: 'standard' }));
+  delete replay.header.tossTemplateSeats;
+  delete replay.header.toss;
+  delete replay.header.randomState;
+  const restored = replayMatch(replay);
+  assert.equal(restored.attackerTeam, 0);
+  assert.deepEqual(restored.players.map(({ team, role }) => ({ team, role })), state.tossTemplateSeats.map(({ team, role }) => ({ team, role })));
+  assert.deepEqual(restored.random, { seed: 1, state: 1 });
+  assert.equal('toss' in restored, false);
+  assert.deepEqual(restored.eventLog, []);
+});
+
+test('new replay headers require complete toss and RNG metadata', () => {
+  const base = createReplay(make(1));
+  const missingToss = structuredClone(base); delete missingToss.header.toss;
+  assert.throws(() => replayMatch(missingToss), /toss must be an object/);
+  const nullToss = structuredClone(base); nullToss.header.toss = null;
+  assert.throws(() => replayMatch(nullToss), /toss must be an object/);
+  const malformedToss = structuredClone(base); malformedToss.header.toss.attackerTeam = 0;
+  assert.throws(() => replayMatch(malformedToss), /attackerTeam must match winnerTeam/);
+  const malformedDraw = structuredClone(base); malformedDraw.header.toss.draw = '0.6';
+  assert.throws(() => replayMatch(malformedDraw), /draw must be in/);
+  const missingRandom = structuredClone(base); delete missingRandom.header.randomState;
+  assert.throws(() => replayMatch(missingRandom), /randomState must be/);
+  const nullRandom = structuredClone(base); nullRandom.header.randomState = null;
+  assert.throws(() => replayMatch(nullRandom), /randomState must be/);
+  const malformedTemplate = structuredClone(base); malformedTemplate.header.tossTemplateSeats = null;
+  assert.throws(() => replayMatch(malformedTemplate), /tossTemplateSeats must be an array/);
+});
 
 test('replay header captures setup and replay re-simulates deterministic per-tick input', () => {
   const state = make();
