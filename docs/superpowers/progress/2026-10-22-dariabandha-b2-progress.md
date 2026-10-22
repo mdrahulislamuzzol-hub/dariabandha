@@ -1,8 +1,8 @@
 # Dariabandha B2 Progress Ledger
 
-**Status:** Tasks 1–4 are implemented and independently reviewed. Task 4 implementation commit `8000c7c` is pushed to `codex/dariabandha-b1`. The 78-test suite and production build pass. B2 acceptance is **incomplete** pending browser/WebGL and keyboard/touch manual checks.
+**Status:** Tasks 1–4 are implemented and independently reviewed. Task 4 implementation commit `8000c7c` is pushed; browser-check fixes have been implemented and verified with 81/81 tests and a passing production build. B2 acceptance is **incomplete** pending all-eight visibility in a single view, physical touch, and saved court-end screenshots.
 **Plan:** `docs/superpowers/plans/2026-10-22-dariabandha-b2-playable-browser-game.md`  
-**Task 4 base:** branch `codex/dariabandha-b1`, reviewed Task 3 checkpoint `e6f02a7`, plus the documentation-only resume checkpoint `d26065b`. Task 4 implementation commit: `8000c7c`. B1 is complete; the cumulative suite has 78 passing tests.
+**Task 4 base:** branch `codex/dariabandha-b1`, reviewed Task 3 checkpoint `e6f02a7`, plus the documentation-only resume checkpoint `d26065b`. Task 4 implementation commit: `8000c7c`. B1 is complete; the current cumulative suite has 81 passing tests.
 **B2 workflow:** sequential fresh implementer → independent reviewer → fixes → fresh re-review, then commit/push before beginning the next task.
 
 This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026-10-22-dariabandha-b2-playable-browser-game/progress.md` and the task reports/checklists are detailed execution records and must stay consistent with this checkpoint.
@@ -54,9 +54,10 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 
 - Added a basic DOM HUD driven by B1 state and events: controlled role/team, phase, score, half clock, stamina, and latest event/call. The screen-reader live region is limited to the call text so frame-by-frame clock/stamina changes are not announced continuously.
 - Added a reset button that recreates the fixed Quick Match 4v4 fixture using its original seed and role setup. The controlled seat stays fixed; reset clears accumulated time/input and does not consume an extra toss draw.
-- Focused Task 4 tests: 3/3. Full Node suite: 78/78. Vite production build passes (20 modules; 645.49 kB minified JS / 168.14 kB gzip) with its default >500 kB advisory. `git diff --check` passes. Independent review found no actionable findings and reran all checks.
-- Browser attempt: Vite reported ready at `http://127.0.0.1:4173/`; the Codex in-app browser returned `ERR_CONNECTION_TIMED_OUT`, including when the server was started outside the sandbox. WebGL, screenshot, keyboard play, and phone/touch checks were not completed; startup/frame-time/memory measurements were unavailable. The exact attempt is recorded in the Task 4 manual checklist.
-- Task 4 implementation commit `8000c7c` is pushed. Seven AI seats remain stationary. B2 acceptance remains incomplete until manual checks can run in a browser that can reach the local server. Do not start B3 before that gate is cleared.
+- Browser-check fixes: source review found all four opening attackers shared one coordinate; initial and counter-attack reset formations now spread attackers across the entry box. Local-only `humanRole` query parameters expose deterministic Guard/Sikka fixtures without a menu. `?humanRole=guard&tagTest=1` places one stationary opponent in a legal tag window for QA.
+- Full Node suite after fixes: 81/81. Vite production build passes (20 modules; 646.31 kB minified JS / 168.42 kB gzip) with its default >500 kB advisory. `git diff --check` passes.
+- In-app browser verification now confirms WebGL, the HUD, attacker/Sikka/Guard keyboard controls, sprint stamina drain, a valid tag result in the Guard test fixture, and reset. The four opening attackers render in distinct positions, though the role camera still occludes some opponents in a single view. Physical touch and saved screenshots of both court ends remain unverified; no performance measurements were recorded. Exact details are in the Task 4 manual checklist.
+- Task 4 implementation commit `8000c7c` is pushed; follow-up fixes and verification are recorded with the Task 4 report/checklist. Seven AI seats remain stationary. Do not start B3 before the remaining B2 acceptance checks pass.
 
 ## Review Log
 
@@ -65,8 +66,8 @@ This file is the **canonical B2 progress/status ledger**. `.superpowers/sdd/2026
 - Final independent plan review: clean, no actionable findings. Task 1 independent implementation review: clean, no actionable findings. Reviewer reran the 63-test Node suite and production build successfully; the local HTTP smoke limitation is accurately recorded.
 - Task 2 independent implementation review: clean, no code/scope findings; reviewer confirmed 68/68 tests and production build. Task 2 was committed/pushed through checkpoint `c562467`. Browser/WebGL screenshots remain outstanding.
 - Task 3 implementation is independently reviewed clean with 75/75 tests and a passing production build. The owner-approved stop-time deviation is documented in the plan and report. Task 3 is pushed through `e6f02a7`; Task 4 is next.
-- Task 4 implementation review is clean; the 3 focused tests, 78-test full suite, and production build pass. Task 4 code commit `8000c7c` is pushed. Browser/WebGL/manual controls remain blocked by the in-app browser's localhost timeout; B2 acceptance is incomplete pending those checks.
+- Task 4 implementation review is clean; its original 78-test suite and production build pass, and commit `8000c7c` is pushed. The follow-up fixed attacker spawn overlap and made Guard/Sikka fixtures reachable; 81/81 tests/build pass and Guard/Tag browser checks are confirmed. B2 acceptance remains incomplete pending single-view player visibility, physical touch, and screenshots.
 
 ## Handoff Rule
 
-Before each task, read the plan and this ledger, confirm branch/HEAD/working tree, and compare the owner-supplied master plan with read-only `sources/` and `master.txt`. Tasks 1–4 are implemented, reviewed, and pushed; Task 4 implementation commit is `8000c7c`. B2 acceptance is still incomplete pending browser/WebGL and keyboard/touch checks. After B2 acceptance only, the next master-plan step is B3 Match flow. Never repeat completed tasks unless a concrete regression is found and separately documented.
+Before each task, read the plan and this ledger, confirm branch/HEAD/working tree, and compare the owner-supplied master plan with read-only `sources/` and `master.txt`. Tasks 1–4 are implemented and the Task 4 follow-up is recorded in the report/checklist. B2 acceptance remains incomplete pending single-view visibility, physical touch, and saved court-end screenshots. After B2 acceptance only, the next master-plan step is B3 Match flow. Never repeat completed tasks unless a concrete regression is found and separately documented.

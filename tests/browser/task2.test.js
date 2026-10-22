@@ -57,6 +57,7 @@ test('all eight actors preserve seat/team/controller/role and map B1 spawn posit
   assert.equal(actors.filter(({ controller }) => controller === 'AI').length, 7);
   assert.ok(actors.some(({ role }) => role === 'sikka'));
   assert.ok(actors.some(({ role }) => role === 'guard'));
+  assert.equal(new Set(actors.map(({ position }) => `${position.x},${position.z}`)).size, 8, 'opening actors should not share spawn positions');
 });
 
 test('render interpolation blends only transforms between authoritative states', () => {

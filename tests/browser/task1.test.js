@@ -1,9 +1,36 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createGameCoordinator, MAX_STEPS_PER_FRAME, TICK_RATE } from '../../src/browser/coordinator.js';
-import { createQuickMatchFixture, QUICK_MATCH_SEED } from '../../src/browser/quick-match-fixture.js';
+import { createQuickMatchFixture, isQuickMatchTagTest, QUICK_MATCH_SEED, selectQuickMatchHumanRole } from '../../src/browser/quick-match-fixture.js';
+import { normalizeTickInput } from '../../src/browser/input.js';
+import { stepMatch } from '../../src/rules/simulation.js';
 
 const roles = ['attacker', 'guard', 'sikka'];
+
+test('local browser fixture role can be selected by URL without adding a menu', () => {
+  assert.equal(selectQuickMatchHumanRole('?humanRole=guard'), 'guard');
+  assert.equal(selectQuickMatchHumanRole('?humanRole=sikka'), 'sikka');
+  assert.equal(selectQuickMatchHumanRole('?humanRole=unknown'), 'attacker');
+  assert.equal(selectQuickMatchHumanRole(''), 'attacker');
+  assert.equal(isQuickMatchTagTest('?humanRole=guard&tagTest=1'), true);
+  assert.equal(isQuickMatchTagTest('?humanRole=attacker&tagTest=1'), false);
+});
+
+test('guard tag test fixture presents a legal stationary attacker target', () => {
+  let state = createQuickMatchFixture('guard', { tagTest: true });
+  const guard = state.players.find((player) => player.controller === 'human');
+  const target = state.players.find((player) => player.team !== guard.team && player.role === 'attacker');
+  assert.ok(Math.abs(Math.hypot(target.position.x - guard.position.x, target.position.z - guard.position.z) - 0.8) < 1e-12);
+  assert.throws(() => createQuickMatchFixture('attacker', { tagTest: true }), /requires humanRole guard/);
+  const input = normalizeTickInput({ tag: true }, state, guard.seat);
+  assert.equal(input.tag.targetSeat, target.seat);
+  for (let tick = 0; tick < 40; tick += 1) {
+    const result = stepMatch(state, tick === 0 ? { [guard.seat]: input } : {});
+    state = result.state;
+  }
+  assert.ok(state.eventLog.some((event) => event.type === 'tagged' && event.reason === 'valid-contact'));
+  assert.equal(state.players.find((player) => player.seat === target.seat).state, 'eliminated');
+});
 
 test('fixed Quick Match fixtures are deterministic 4v4 with one human and seven inactive AI seats', () => {
   for (const role of roles) {

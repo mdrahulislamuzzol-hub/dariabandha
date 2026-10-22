@@ -11,6 +11,10 @@ import { getProfile } from './profiles.js';
 import { assertValidFormat } from './validation.js';
 import { drawMulberry32 } from './random.js';
 
+// Deterministic entry-box spacing keeps simultaneous attackers legible while
+// remaining wholly inside every supported court width.
+const ATTACKER_SPAWN_SPACING_METRES = 0.75;
+
 function finite(value, field) {
   if (!Number.isFinite(value)) throw new TypeError(`${field} must be a finite number`);
 }
@@ -37,7 +41,19 @@ function validateSeats(seats, format) {
   }).sort((a, b) => a.seat - b.seat);
 }
 
-function initialPosition(player, court, guardLaneIndex = 0) {
+export function positionAttackersAtEntry(state, player, attackerOrdinal = 0) {
+  const court = state.court ?? state;
+  const { zMin, zMax } = court.bounds;
+  const lateralOrdinal = attackerOrdinal === 0
+    ? 0
+    : (attackerOrdinal % 2 === 1 ? -Math.ceil(attackerOrdinal / 2) : attackerOrdinal / 2);
+  return {
+    x: lateralOrdinal * ATTACKER_SPAWN_SPACING_METRES,
+    z: player.team === 0 ? zMin + court.boxSizeMetres / 2 : zMax - court.boxSizeMetres / 2,
+  };
+}
+
+function initialPosition(player, court, guardLaneIndex = 0, attackerOrdinal = 0) {
   const { xMin, xMax, zMin, zMax } = court.bounds;
   if (player.role === 'sikka') return { x: 0, z: (zMin + zMax) / 2 };
   if (player.role === 'guard') {
@@ -50,7 +66,7 @@ function initialPosition(player, court, guardLaneIndex = 0) {
     return { x: player.team === 0 ? xMin / 2 : xMax / 2, z: laneZ };
   }
   // Attackers enter from opposing ends, within the first/last box.
-  return { x: 0, z: player.team === 0 ? zMin + court.boxSizeMetres / 2 : zMax - court.boxSizeMetres / 2 };
+  return positionAttackersAtEntry(court, player, attackerOrdinal);
 }
 
 /** Creates a serializable, renderer-independent match state. Seat objects are
@@ -118,11 +134,21 @@ function initializeMatch({ profileId, profileVersion, format, seed, seats, timin
   }
   const court = createCourt(format);
   const guardLaneBySeat = new Map();
+  const attackersBySeat = new Map();
+  for (const team of [0, 1]) {
+    roleSeats.filter((player) => player.team === team && player.role === 'attacker')
+      .forEach((player, index) => attackersBySeat.set(player.seat, index));
+  }
   roleSeats.filter((player) => player.team !== attackerTeam && player.role === 'guard')
     .forEach((player, index) => guardLaneBySeat.set(player.seat, index));
   const players = roleSeats.map((player) => ({
     ...player,
-    position: initialPosition(player, court, guardLaneBySeat.get(player.seat) ?? 0),
+    position: initialPosition(
+      player,
+      court,
+      guardLaneBySeat.get(player.seat) ?? 0,
+      attackersBySeat.get(player.seat) ?? 0,
+    ),
     velocity: { x: 0, z: 0 },
     facing: { x: 0, z: player.team === 0 ? 1 : -1 },
     stamina: player.role === 'attacker' ? STAMINA_CAPACITY : null,

@@ -36,6 +36,19 @@ test('Competitive tag eliminates attacker and starts half-team counter-attack de
   assert.equal(a.eventLog.find((event) => event.type === 'tagged').consequence, 'attacker-eliminated');
 });
 
+test('4v4 counter-attack resets its active attackers to separate entry positions', () => {
+  const seats = Array.from({ length: 8 }, (_, seat) => ({
+    seat,
+    team: seat < 4 ? 0 : 1,
+    role: seat < 4 ? 'attacker' : (seat === 4 ? 'sikka' : 'guard'),
+  }));
+  const state = createMatch({ profileId: 'quick-match', profileVersion: '0.1', format: '4v4', seed: 0, seats });
+  const tagged = applyRuleEvent(state, { type: 'tagged', guardSeat: 5, targetSeat: 0, tick: 1 });
+  const attackers = tagged.players.filter((player) => player.team === tagged.attackerTeam && player.role === 'attacker');
+  assert.equal(attackers.length, 2);
+  assert.equal(new Set(attackers.map((player) => player.position.x)).size, 2);
+});
+
 test('period clock transitions through halftime, standard tie-break, golden daan, and full time', () => {
   let s = make('competitive-standard'); s.clock.remainingTicks = 1;
   let result = stepMatch(s, {}); s = result.state;

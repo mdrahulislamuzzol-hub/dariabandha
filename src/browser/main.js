@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { createGameCoordinator } from './coordinator.js';
+import { isQuickMatchTagTest, selectQuickMatchHumanRole } from './quick-match-fixture.js';
 import { createGreyboxView } from './greybox-view.js';
 import { createDeviceControls, normalizeTickInput } from './input.js';
 import { applyRoleCamera, describeRoleCamera } from './role-camera.js';
@@ -18,7 +19,10 @@ const hud = {
   stamina: document.querySelector('#hud-stamina'),
   call: document.querySelector('#hud-call'),
 };
-const game = createGameCoordinator();
+const game = createGameCoordinator({
+  humanRole: selectQuickMatchHumanRole(window.location.search),
+  tagTest: isQuickMatchTagTest(window.location.search),
+});
 
 try {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });

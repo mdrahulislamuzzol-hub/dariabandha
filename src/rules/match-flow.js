@@ -1,5 +1,6 @@
 import { getProfile } from './profiles.js';
 import { BREAK_TICKS, CLOCK_ZERO_RESOLVE_WINDOW_TICKS, FOOT_CIRCLE_RADIUS_METRES, STANDARD_TIEBREAK_HALF_TICKS } from './constants.js';
+import { positionAttackersAtEntry } from './state.js';
 
 const copy = (value) => structuredClone(value);
 const ordered = (events) => [...events].sort((a, b) => (a.tick ?? 0) - (b.tick ?? 0) || (a.guardSeat ?? a.seat ?? 0) - (b.guardSeat ?? b.seat ?? 0) || (a.targetSeat ?? 0) - (b.targetSeat ?? 0));
@@ -13,10 +14,9 @@ function setAttackers(state, team, count) {
 }
 
 function resetAttackers(state, team) {
-  const { zMin, zMax } = state.court.bounds;
-  for (const p of state.players) {
-    if (p.team !== team || p.role !== 'attacker') continue;
-    p.position = { x: 0, z: p.team === 0 ? zMin + state.court.boxSizeMetres / 2 : zMax - state.court.boxSizeMetres / 2 };
+  const attackers = state.players.filter((player) => player.team === team && player.role === 'attacker').sort((a, b) => a.seat - b.seat);
+  for (const [index, p] of attackers.entries()) {
+    p.position = positionAttackersAtEntry(state, p, index, attackers.length);
     p.velocity = { x: 0, z: 0 };
     p.routeStage = 0;
     p.state = 'active';

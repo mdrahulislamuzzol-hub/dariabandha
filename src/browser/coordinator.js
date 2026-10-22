@@ -4,9 +4,9 @@ import { createQuickMatchFixture } from './quick-match-fixture.js';
 
 /** Browser-facing owner of a B1 match and its fixed-tick clock. This module is
  * DOM- and renderer-free so cadence behavior is easy to verify in Node. */
-export function createGameCoordinator({ humanRole = 'attacker', onUpdate = () => {} } = {}) {
+export function createGameCoordinator({ humanRole = 'attacker', tagTest = false, onUpdate = () => {} } = {}) {
   if (typeof onUpdate !== 'function') throw new TypeError('onUpdate must be a function');
-  let state = createQuickMatchFixture(humanRole);
+  let state = createQuickMatchFixture(humanRole, { tagTest });
   // Seat identity is fixed for the full match. B1 may change this player's
   // role during daan/phase transitions; control never follows a role label.
   const humanSeat = state.players.find((player) => player.controller === 'human').seat;
@@ -73,7 +73,7 @@ export function createGameCoordinator({ humanRole = 'attacker', onUpdate = () =>
       return { accumulator, state, previousState, events, steps, interpolationAlpha: accumulator * TICK_RATE };
     },
     reset() {
-      state = createQuickMatchFixture(humanRole);
+      state = createQuickMatchFixture(humanRole, { tagTest });
       previousState = state;
       accumulator = 0;
       humanInput = {};
