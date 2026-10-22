@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import './style.css';
 import { createGameCoordinator } from './coordinator.js';
+import { createGreyboxView } from './greybox-view.js';
 
 const root = document.querySelector('#game-root');
 const status = document.querySelector('#game-status');
@@ -9,30 +10,33 @@ const game = createGameCoordinator();
 try {
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setSize(root.clientWidth || window.innerWidth, 480, false);
+  const sceneHeight = 640;
+  renderer.setSize(root.clientWidth || window.innerWidth, sceneHeight, false);
   renderer.setClearColor(0x14221d, 1);
   root.append(renderer.domElement);
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, (root.clientWidth || window.innerWidth) / 480, 0.1, 100);
-  camera.position.set(0, 8, 14);
+  const view = createGreyboxView(THREE, game.state);
+  const scene = view.scene;
+  const camera = new THREE.PerspectiveCamera(44, (root.clientWidth || window.innerWidth) / sceneHeight, 0.1, 100);
+  camera.position.set(0, 12, 15);
   camera.lookAt(0, 0, 0);
 
-  status.textContent = `B2 Task 1 shell ready · Quick Match 4v4 · ${game.state.players.length} seats · human ${game.humanSeat} (${game.state.players[game.humanSeat].role}) · tick ${game.state.tick}`;
+  status.textContent = `B2 grey-box · Quick Match 4v4 · ${game.state.players.length} players · human seat ${game.humanSeat} (${game.state.players[game.humanSeat].role}) · seven inactive AI · court lines and role markers shown`;
 
   let previousTimestamp;
   function frame(timestamp) {
     const deltaSeconds = previousTimestamp === undefined ? 0 : (timestamp - previousTimestamp) / 1000;
     previousTimestamp = timestamp;
-    game.advanceFrame(Math.max(0, deltaSeconds));
+    const frameState = game.advanceFrame(Math.max(0, deltaSeconds));
+    view.update(frameState.state, frameState.previousState, frameState.interpolationAlpha);
     renderer.render(scene, camera);
     window.requestAnimationFrame(frame);
   }
   window.requestAnimationFrame(frame);
   window.addEventListener('resize', () => {
     const width = root.clientWidth || window.innerWidth;
-    renderer.setSize(width, 480, false);
-    camera.aspect = width / 480;
+    renderer.setSize(width, sceneHeight, false);
+    camera.aspect = width / sceneHeight;
     camera.updateProjectionMatrix();
   });
 } catch (error) {
