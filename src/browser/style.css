@@ -12,6 +12,13 @@ main { width: min(100% - 2rem, 70rem); margin: 2rem auto; }
 h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
 #game-status { min-height: 1.5rem; color: #c3d1c6; }
 #game-status[data-state='webgl-unavailable'] { color: #ffcf87; }
+#game-hud { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: .65rem; align-items: stretch; margin: 0 0 .75rem; }
+#game-hud > div { min-width: 0; padding: .6rem .75rem; border: 1px solid #43574a; border-radius: .4rem; background: #19251e; }
+#game-hud span { display: block; color: #b5c6b8; font-size: .75rem; }
+#game-hud strong { display: block; margin-top: .15rem; overflow-wrap: anywhere; font-size: .95rem; }
+#game-hud .hud-call { grid-column: span 4; }
+#game-reset { min-height: 2.8rem; padding: .4rem .85rem; border: 1px solid #b5c6b8; border-radius: .4rem; background: #263b2e; color: #f3f5ef; font: inherit; font-weight: 700; cursor: pointer; }
+#game-reset:focus-visible { outline: 3px solid #f0a34a; outline-offset: 2px; }
 #game-root { position: relative; width: 100%; min-height: 24rem; overflow: hidden; border: 1px solid #43574a; background: #14221d; touch-action: none; }
 #game-root canvas { display: block; width: 100%; height: 40rem; }
 .game-controls { position: absolute; inset: auto 1rem 1rem; display: flex; justify-content: space-between; align-items: end; gap: 1rem; pointer-events: none; user-select: none; }
@@ -20,3 +27,4 @@ h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
 .touch-actions button { min-width: 6rem; min-height: 4.25rem; border: 2px solid #d7e5d9; border-radius: .75rem; background: #101914dd; color: white; font: inherit; font-weight: 700; touch-action: none; }
 .touch-actions button:active { background: #526d59; }
 @media (hover: hover) and (pointer: fine) { .game-controls { opacity: .62; } }
+@media (max-width: 700px) { #game-hud { grid-template-columns: repeat(3, minmax(0, 1fr)); } #game-hud .hud-call { grid-column: span 2; } }

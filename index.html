@@ -10,6 +10,16 @@
     <main>
       <h1>Dariabandha</h1>
       <p id="game-status" role="status" aria-live="polite">Starting the local game…</p>
+      <section id="game-hud" aria-label="Match information">
+        <div><span>Role</span><strong id="hud-role">—</strong></div>
+        <div><span>Team</span><strong id="hud-team">—</strong></div>
+        <div><span>Phase</span><strong id="hud-phase">—</strong></div>
+        <div><span>Score</span><strong id="hud-score">—</strong></div>
+        <div><span>Half clock</span><strong><span id="hud-clock">—:—</span> · half <span id="hud-half">—</span></strong></div>
+        <div><span>Stamina</span><strong id="hud-stamina">—</strong></div>
+        <div class="hud-call"><span>Latest B1 call</span><strong id="hud-call" aria-live="polite">—</strong></div>
+        <button id="game-reset" type="button">Reset match</button>
+      </section>
       <div id="game-root" aria-label="Dariabandha game scene"></div>
     </main>
     <script type="module" src="/src/browser/main.js"></script>
