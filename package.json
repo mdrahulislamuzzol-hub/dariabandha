@@ -1,0 +1,8 @@
+{
+  "name": "dariabandha-rules-core",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
